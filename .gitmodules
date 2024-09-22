@@ -1,3 +1,0 @@
-[submodule "3rdparty/local-path-provisioner"]
-	path = 3rdparty/local-path-provisioner
-	url = https://github.com/rancher/local-path-provisioner
