@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "csmm.fullname" . }}-cm
+data:
+  set-envvars.sh: |
+    #
+    # Environment variable definitions for init and startup scripts.
+    #
+
+    MYSQL_HOST="{{ include "csmm.mysql.host" . }}"
+    MYSQL_PORT="{{ include "csmm.mysql.port" . }}"
+    MYSQL_NAME="{{ include "csmm.mysql.database" . }}"
+    MYSQL_USERNAME="{{ include "csmm.mysql.username" . }}"
+    {{- if .Values.csmm.mysql.password }}
+    MYSQL_PASSWORD="{{ .Values.csmm.mysql.password }}"
+    {{- else }}
+    MYSQL_PASSWORD="$(cat /secrets/mariadb/password)"
+    {{- end }}
+
+    REDIS_HOST="{{ include "csmm.redis.host" . }}"
+    REDIS_PORT="{{ include "csmm.redis.port" . }}"
+    {{- if .Values.csmm.redis.password }}
+    REDIS_PASSWORD="{{ .Values.csmm.redis.password }}"
+    {{- else }}
+    REDIS_PASSWORD="$(cat /secrets/redis/password)"
+    {{- end }}
+
+    export DBSTRING="mysql2://$MYSQL_USERNAME:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_NAME"
+    export REDISSTRING="redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT"
+
+    export CSMM_HOSTNAME="{{ .Values.csmm.hostname }}"
+    export CSMM_LOGLEVE="{{ .Values.csmm.logLevel }}"
+    export CSMM_PORT="{{ .Values.csmm.port }}"
+    export CSMM_DONATOR_TIER="{{ .Values.csmm.donatorTier }}"
+    export CSMM_LOG_CHECK_INTERVAL="{{ .Values.csmm.logCheckInterval }}"
+    export CSMM_LOG_COUNT="{{ .Values.csmm.logCount }}"
+    export CSMM_ADMINS="{{ .Values.csmm.admins }}"
+
+    export API_KEY_STEAM="{{ .Values.csmm.apis.steam }}"
+    {{- with .Values.csmm.apis.discord }}
+    export DISCORDOWNERIDS="{{ .ownerIds }}"
+    export DISCORDBOTTOKEN="{{ .botToken }}"
+    export DISCORDCLIENTSECRET="{{ .clientSecret }}"
+    export DISCORDCLIENTID="{{ .clientId }}"
+    {{- end }}
+
+    export INVITELINK="{{ .Values.csmm.inviteLink }}"
+    export CSMM_PRIVATE_INSTANCE="{{ .Values.csmm.privateInstance }}"
+    export CSMM_DONOR_ONLY="{{ .Values.csmm.donorOnly }}"
+
+  init-db.sh: |
+    #!/bin/sh
+    #
+    # Database initialization script.
+    #
+    set -e
+
+    BASE_DIR="$(cd "$(dirname "$0")"; pwd -P)"
+    source "$BASE_DIR/set-envvars.sh"
+
+    echo "$(date): Waiting for database to become available"
+    npm run wait-for:db
+
+    echo "$(date): Migrating database"
+    npm run db:migrate
+
+  start-csmm.sh: |
+    #!/bin/sh
+    #
+    # CSMM startup wrapper script.
+    #
+    set -e
+
+    BASE_DIR="$(cd "$(dirname "$0")"; pwd -P)"
+    source "$BASE_DIR/set-envvars.sh"
+
+    MODE="${1:-app}"
+
+    case $MODE in
+      app|worker) ;;
+      *) echo "error: invalid mode: $MODE. Must be either app or worker."; exit 1 ;;
+    esac
+
+    npm run start:$MODE

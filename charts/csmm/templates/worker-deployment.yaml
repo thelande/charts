@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "csmm.fullname" . }}-workers
+  labels:
+    {{- include "csmm.workers.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.workers.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "csmm.workers.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.workers.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "csmm.workers.labels" . | nindent 8 }}
+        {{- with .Values.workers.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "csmm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/scripts/start-csmm.sh", "worker"]
+          resources:
+            {{- toYaml .Values.workers.resources | nindent 12 }}
+          volumeMounts:
+            - name: startup-scripts
+              mountPath: /scripts
+            - name: secrets
+              mountPath: /secrets
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NODE_ENV
+              value: production
+      volumes:
+        - name: startup-scripts
+          configMap:
+            name: {{ include "csmm.fullname" . }}-cm
+            defaultMode: 0550
+        {{- if or (or .Values.mariadb.enabled .Values.csmm.mysql.passwordSecret) (or .Values.redis.enabled .Values.csmm.redis.passwordSecret) }}
+        - name: secrets
+          projected:
+            sources:
+              {{- if .Values.mariadb.enabled }}
+              - secret:
+                  name: {{ include "csmm.name" . }}-mariadb
+                  items:
+                    - key: mariadb-password
+                      path: mariadb/password
+              {{- else if .Values.csmm.mysql.passwordSecret }}
+              - secret:
+                  name: {{ .Values.csmm.mysql.passwordSecret | quote }}
+                  items:
+                    - key: mariadb-password
+                      path: mariadb/password
+              {{- end }}
+              {{- if .Values.redis.enabled }}
+              - secret:
+                  name: {{ include "csmm.name" . }}-redis
+                  items:
+                    - key: redis-password
+                      path: redis/password
+              {{- else if .Values.csmm.redis.passwordSecret }}
+              - secret:
+                  name: {{ .Values.csmm.redis.passwordSecret }}
+                  items:
+                    - key: redis-password
+                      path: redis/password
+              {{- end }}
+        {{- end }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
