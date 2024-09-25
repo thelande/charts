@@ -1,5 +1,25 @@
 apiVersion: v1
 entries:
+  csmm:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-09-25T00:11:21.212870002Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 19.0.4
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.0.2
+    description: A Helm chart for Catalysm's Server Manager & Monitor
+    digest: 87d406e546d4addea5491259ec716002d48dcb4c90fa1fa5dd91a0f266fa3412
+    name: csmm
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/csmm-0.1.0/csmm-0.1.0.tgz
+    version: 0.1.0
   local-path-provisioner:
   - apiVersion: v1
     appVersion: v0.0.29
@@ -49,4 +69,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-22T17:15:13.501047952Z"
+generated: "2024-09-25T00:11:21.212883307Z"
