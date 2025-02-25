@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  apcupsd:
+  - apiVersion: v2
+    appVersion: v1.0.6
+    created: "2025-02-25T05:48:17.467058395Z"
+    description: A Helm chart for apcupsd
+    digest: 9fbca18e156ce414e03f0d40d92dc854d2a7b083a9cc80fa13929ec60e646573
+    name: apcupsd
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/apcupsd-0.1.0/apcupsd-0.1.0.tgz
+    version: 0.1.0
   apcupsd-exporter:
   - apiVersion: v2
     appVersion: v1.0.6
@@ -91,4 +102,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-25T05:31:54.907366592Z"
+generated: "2025-02-25T05:48:17.467072931Z"
