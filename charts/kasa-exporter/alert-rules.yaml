@@ -1,0 +1,27 @@
+groups:
+  - name: kasa.rules
+    rules:
+      - alert: KasaTargetDown
+        expr: kasa_up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Kasa exporter target down
+          description: "A kasa-exporter probe target is down (job {{ $labels.job }})"
+
+      - alert: KasaFridgeTurnedOffWarning
+        expr: kasa_device_power_mw * on(instance) kasa_meta_info{alias="Fridge"} == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Fridge has been powered off for 30 minutes.
+
+      - alert: KasaFridgeTurnedOffCritical
+        expr: kasa_device_power_mw * on(instance) kasa_meta_info{alias="Fridge"} == 0
+        for: 45m
+        labels:
+          severity: critical
+        annotations:
+          summary: Fridge has been powered off for 45 minutes.

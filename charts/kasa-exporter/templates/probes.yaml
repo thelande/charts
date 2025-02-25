@@ -1,0 +1,21 @@
+{{- $labels := include "kasa-exporter.labels" . -}}
+{{- $fullname := include "kasa-exporter.fullname" . -}}
+{{- $servicePort := .Values.service.port -}}
+{{- range .Values.probes -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: {{ required "Target name is required." .name }}
+  labels:
+    {{- $labels | nindent 4 }}
+spec:
+  interval: {{ .scrapeInterval | default "1m" | quote }}
+  prober:
+    url: {{ $fullname }}:{{ $servicePort }}
+    path: /metrics
+  targets:
+    staticConfig:
+      static:
+        - {{ required "Target address is required." .address }}
+{{ end }}
