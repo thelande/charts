@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  apcupsd-exporter:
+  - apiVersion: v2
+    appVersion: v1.0.6
+    created: "2025-02-25T05:31:54.907356333Z"
+    description: A Helm chart for apcupsd-exporter
+    digest: 4e562b407ae22f6e55b8ccc28a5af3d74a0e667112bbd34230052c6abf72ac75
+    name: apcupsd-exporter
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/apcupsd-exporter-0.1.0/apcupsd-exporter-0.1.0.tgz
+    version: 0.1.0
   csmm:
   - apiVersion: v2
     appVersion: 0.1.0
@@ -80,4 +91,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-25T05:30:21.127329253Z"
+generated: "2025-02-25T05:31:54.907366592Z"
