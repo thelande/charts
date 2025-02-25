@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "apcupsd.fullname" . }}
+  labels:
+    {{- include "apcupsd.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: apcupsd
+      protocol: TCP
+      name: apcupsd
+  selector:
+    {{- include "apcupsd.selectorLabels" . | nindent 4 }}
