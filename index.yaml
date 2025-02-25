@@ -20,6 +20,17 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/csmm-0.1.0/csmm-0.1.0.tgz
     version: 0.1.0
+  kasa-exporter:
+  - apiVersion: v2
+    appVersion: v0.2.3
+    created: "2025-02-25T05:30:21.12731694Z"
+    description: A Helm chart for kasa-exporter
+    digest: e4d7cf346b9a726dc6b00ae1180c082b0f1b097d3ddf65aac2672a8588e6468a
+    name: kasa-exporter
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/kasa-exporter-0.1.0/kasa-exporter-0.1.0.tgz
+    version: 0.1.0
   local-path-provisioner:
   - apiVersion: v1
     appVersion: v0.0.29
@@ -69,4 +80,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-25T00:11:21.212883307Z"
+generated: "2025-02-25T05:30:21.127329253Z"
