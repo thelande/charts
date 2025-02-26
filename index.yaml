@@ -73,6 +73,16 @@ entries:
   openmeteo-exporter:
   - apiVersion: v2
     appVersion: v1.0.3
+    created: "2025-02-26T23:05:43.768642804Z"
+    description: A Helm chart for openmeteo-exporter
+    digest: 1f822ff38ef53cb248df1dbde6a813ce74c187189be81620963228b4708f7c07
+    name: openmeteo-exporter
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/openmeteo-exporter-0.1.3/openmeteo-exporter-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: v1.0.3
     created: "2025-02-26T22:58:39.992234465Z"
     description: A Helm chart for openmeteo-exporter
     digest: 30e5d8aefe4492284f40564077537409e6196a36005a971ba49eba51b53decf0
@@ -112,4 +122,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-26T22:58:39.992271193Z"
+generated: "2025-02-26T23:05:43.768665667Z"
