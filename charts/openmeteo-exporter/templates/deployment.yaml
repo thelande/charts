@@ -36,7 +36,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - /app/openmeteo-exporter
+            - /app/openmeteo_exporter
             - --config.file
             - /config/config.yaml
           ports:
