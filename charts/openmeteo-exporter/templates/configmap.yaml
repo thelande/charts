@@ -5,6 +5,6 @@ metadata:
   labels:
     {{- include "openmeteo-exporter.labels" . | nindent 4 }}
 data:
-  config.yml: |
+  config.yaml: |
     locations:
       {{- toYaml .Values.locations | nindent 10 }}
