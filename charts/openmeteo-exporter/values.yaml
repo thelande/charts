@@ -99,6 +99,10 @@ tolerations: []
 
 affinity: {}
 
+serviceMonitor:
+  enabled: false
+  scrapeInterval: 2m
+
 # List of weather locations to collect.
 locations: []
 # - name: San Francisco
