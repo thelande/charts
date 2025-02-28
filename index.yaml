@@ -123,6 +123,16 @@ entries:
     version: 0.1.0
   ping-exporter:
   - apiVersion: v2
+    appVersion: v1.1.3
+    created: "2025-02-28T04:48:03.72793039Z"
+    description: A Helm chart for Kubernetes
+    digest: 2dc9dcdb945ecdb20cf24a85395fa426b4cedfcafde61231d54d5b23b87aa7cf
+    name: ping-exporter
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/ping-exporter-0.1.1/ping-exporter-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: v1.1.0
     created: "2025-02-28T04:35:23.179326628Z"
     description: A Helm chart for Kubernetes
@@ -143,4 +153,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-28T04:35:23.17934374Z"
+generated: "2025-02-28T04:48:03.72795205Z"
