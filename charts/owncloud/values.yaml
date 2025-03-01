@@ -90,10 +90,6 @@ livenessProbe:
   exec:
     command:
       - /usr/bin/healthcheck
-readinessProbe:
-  exec:
-    command:
-      - /usr/bin/healthcheck
 
 # Additional volumes on the output Deployment definition.
 volumes: []
