@@ -48,47 +48,47 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      env:
-        - name: OWNCLOUD_DOMAIN
-          value: {{ .Values.owncloud.domain | quote }}
-        - name: OWNCLOUD_TRUSTED_DOMAINS
-          value: {{ (join "," .Values.owncloud.trustedDomains) | quote }}
-        - name: OWNCLOUD_DB_TYPE
-          value: pgsql
-        - name: OWNCLOUD_DB_HOST
-          value: postgres-cluster-rw
-        - name: OWNCLOUD_DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: postgres-cluster-app
-              key: dbname
-        - name: OWNCLOUD_DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: postgres-cluster-app
-              key: username
-        - name: OWNCLOUD_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-cluster-app
-              key: password
-        - name: OWNCLOUD_REDIS_ENABLED
-          value: "true"
-        - name: OWNCLOUD_REDIS_HOST
-          value: redis-leader
-        - name: OWNCLOUD_ADMIN_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "owncloud.admin.secretName" . }}
-              key: username
-        - name: OWNCLOUD_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "owncloud.admin.secretName" . }}
-              key: password
-      {{- with .Values.env }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          env:
+            - name: OWNCLOUD_DOMAIN
+              value: {{ .Values.owncloud.domain | quote }}
+            - name: OWNCLOUD_TRUSTED_DOMAINS
+              value: {{ (join "," .Values.owncloud.trustedDomains) | quote }}
+            - name: OWNCLOUD_DB_TYPE
+              value: pgsql
+            - name: OWNCLOUD_DB_HOST
+              value: postgres-cluster-rw
+            - name: OWNCLOUD_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-cluster-app
+                  key: dbname
+            - name: OWNCLOUD_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-cluster-app
+                  key: username
+            - name: OWNCLOUD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-cluster-app
+                  key: password
+            - name: OWNCLOUD_REDIS_ENABLED
+              value: "true"
+            - name: OWNCLOUD_REDIS_HOST
+              value: redis-leader
+            - name: OWNCLOUD_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "owncloud.admin.secretName" . }}
+                  key: username
+            - name: OWNCLOUD_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "owncloud.admin.secretName" . }}
+                  key: password
+          {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
         - name: data
           emptyDir: {}
