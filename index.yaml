@@ -124,6 +124,16 @@ entries:
   owncloud:
   - apiVersion: v2
     appVersion: 10.15.0
+    created: "2025-03-02T18:47:29.578307007Z"
+    description: A Helm chart for owncloud - Secure Collaboration Platform
+    digest: 2a22ef942bfbb3f4bfe689d7eef683eebf09ebf57b173de6fed87de1bf25931e
+    name: owncloud
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/owncloud-0.1.3/owncloud-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 10.15.0
     created: "2025-03-01T20:52:16.47685049Z"
     description: A Helm chart for owncloud - Secure Collaboration Platform
     digest: d4c8574b0cc5268c75e485387d51997d6b23d1a5cdf76470191496ca5b109232
@@ -184,4 +194,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-01T20:52:16.476874505Z"
+generated: "2025-03-02T18:47:29.578333737Z"
