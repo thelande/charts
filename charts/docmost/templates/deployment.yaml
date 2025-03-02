@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docmost.fullname" . }}
+  labels:
+    {{- include "docmost.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "docmost.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "docmost.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "docmost.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - bash
+            - -c
+            - |
+              export DATABASE_URL="postgresql://${PGSQL_DB_USERNAME}:${PGSQL_DB_PASSWORD}@${PGSQL_DB_HOST}/${PGSQL_DB_NAME}?schema=public"
+              pnpm start
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: PGSQL_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.appSecretName }}
+                  key: host
+            - name: PGSQL_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.appSecretName }}
+                  key: dbname
+            - name: PGSQL_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.appSecretName }}
+                  key: username
+            - name: PGSQL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.appSecretName }}
+                  key: password
+            - name: APP_URL
+              value: {{ (required "An app URL is required" .Values.docmost.appUrl) | quote }}
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-app-secret" (include "chart.fullname" .) }}
+                  key: appSecret
+            - name: REDIS_URL
+              value: {{ (required "A redis URL is required" .Values.redis.url) | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /app/data/storage
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "docmost.persistence.claimName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
