@@ -90,6 +90,9 @@ livenessProbe:
   exec:
     command:
       - /usr/bin/healthcheck
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
 
 # Additional volumes on the output Deployment definition.
 volumes: []
