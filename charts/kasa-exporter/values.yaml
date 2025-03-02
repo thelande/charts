@@ -102,6 +102,7 @@ antiAffinity: false
 prometheusRule:
   enabled: false
 
+# -- List of devices to be probed. Each entry should have a `name`, `address`, and `scrapeInterval` field.
 probes: []
 # - name: smart-switch
 #   address: 1.2.3.4

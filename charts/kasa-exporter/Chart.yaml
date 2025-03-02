@@ -1,6 +1,9 @@
 apiVersion: v2
 name: kasa-exporter
-description: A Helm chart for kasa-exporter
+description: Prometheus exporter for Kasa smart plugs.
+
+sources:
+  - https://github.com/thelande/kasa_exporter
 
 # A chart can be either an 'application' or a 'library' chart.
 #
