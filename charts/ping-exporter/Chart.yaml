@@ -1,6 +1,9 @@
 apiVersion: v2
 name: ping-exporter
-description: A Helm chart for Kubernetes
+description: Prometheus exporter for ICMP echo requests using https://github.com/digineo/go-ping
+
+sources:
+  - https://github.com/czerwonk/ping_exporter
 
 # A chart can be either an 'application' or a 'library' chart.
 #
