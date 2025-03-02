@@ -117,6 +117,12 @@ env: {}
 
 persistence:
   enabled: false
+  existingClaim: ""
+  storageClassName: ""
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: "5Gi"
 
 owncloud:
   domain: ""

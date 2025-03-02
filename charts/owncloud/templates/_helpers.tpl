@@ -67,3 +67,10 @@ Admin credentials secret
 {{- define "owncloud.admin.secretName" -}}
 {{- default "owncloud-admin" .Values.owncloud.admin.existingSecret }}
 {{- end }}
+
+{{/*
+Data persistent volume claim name
+*/}}
+{{- define "owncloud.persistence.claimName" -}}
+{{- default (printf "%s-%s" (include "owncloud.fullname" .) "data") .Values.persistence.existingClaim }}
+{{- end }}

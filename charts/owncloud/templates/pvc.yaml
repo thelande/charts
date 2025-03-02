@@ -1,0 +1,11 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "owncloud.fullname" . }}-data
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.accessModes | nindent 4 }}
+  {{- toYaml .Values.persistence.resources | nindent 2 }}
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
+{{- end }}
