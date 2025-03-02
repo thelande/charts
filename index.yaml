@@ -42,6 +42,21 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/csmm-0.1.0/csmm-0.1.0.tgz
     version: 0.1.0
+  docmost:
+  - apiVersion: v2
+    appVersion: v0.8.4
+    created: "2025-03-02T23:00:01.95079432Z"
+    description: 'Docmost is an open-source collaborative wiki and documentation software.
+      It is an open-source alternative to Confluence and Notion. '
+    digest: 11c2f0c621da1f1a48ae96edd3bf5ef3d0fdd239165ea9b07c4f7d1ab34f6418
+    home: https://docmost.com/
+    name: docmost
+    sources:
+    - https://github.com/docmost/docmost
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/docmost-0.1.0/docmost-0.1.0.tgz
+    version: 0.1.0
   kasa-exporter:
   - apiVersion: v2
     appVersion: v0.2.3
@@ -234,4 +249,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-02T22:10:49.839436167Z"
+generated: "2025-03-02T23:00:01.95083185Z"
