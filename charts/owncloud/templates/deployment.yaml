@@ -73,9 +73,11 @@ spec:
                   name: postgres-cluster-app
                   key: password
             - name: OWNCLOUD_REDIS_ENABLED
-              value: "true"
+              value: {{ .Values.owncloud.redis.enabled | quote }}
+            {{- if .Values.owncloud.redis.enabled }}
             - name: OWNCLOUD_REDIS_HOST
-              value: redis-leader
+              value: {{ .Values.owncloud.redis.host | quote }}
+            {{- end }}
             - name: OWNCLOUD_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
