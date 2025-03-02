@@ -6,6 +6,7 @@ metadata:
 spec:
   accessModes:
     {{- toYaml .Values.persistence.accessModes | nindent 4 }}
-  {{- toYaml .Values.persistence.resources | nindent 2 }}
+  resources:
+    {{- toYaml .Values.persistence.resources | nindent 4 }}
   storageClassName: {{ .Values.persistence.storageClassName | quote }}
 {{- end }}
