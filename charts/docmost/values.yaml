@@ -135,3 +135,32 @@ redis:
 docmost:
   # -- docmost externally accessible URL
   appUrl: ""
+
+  drawIO:
+    # -- Custom draw.io server url.
+    url: ""
+
+  smtp:
+    # -- Should SMTP be enabled?
+    enabled: false
+    # -- The SMTP server to use for sending emails.
+    host: ""
+    # -- The port to use for the SMTP server.
+    port: 587
+    # -- Use TLS when connecting to the server, typically for port 465.
+    # See nodemailer 'secure' for details
+    secure: false
+
+    mailFrom:
+      # -- The email address from which emails will be sent.
+      address: ""
+      # -- The name associated with the email address from which emails will be sent.
+      name: "Docmost"
+
+    auth:
+      # -- The username for the SMTP server.
+      username: ""
+      # -- The password for the SMTP server.
+      password: ""
+      # -- An existing secret containing the SMTP server username and password.
+      existingSecret: ""

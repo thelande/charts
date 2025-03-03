@@ -67,3 +67,10 @@ Name of the persistent volume claim
 {{- define "docmost.persistence.existingClaim" -}}
 {{ default (printf "%s-%s" (include "docmost.fullname" .) "data") .Values.persistence.existingClaim }}
 {{- end }}
+
+{{/*
+Name of the SMTP auth secret.
+*/}}
+{{- define "docmost.smtp.auth.secretName" -}}
+{{ default (printf "%s-%s" (include "docmost.fullname" .) "smtp-auth") .Values.docmost.smtp.auth.existingSecret }}
+{{- end }}

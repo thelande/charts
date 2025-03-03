@@ -1,6 +1,6 @@
 # docmost
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.4](https://img.shields.io/badge/AppVersion-0.8.4-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.8.4](https://img.shields.io/badge/AppVersion-0.8.4-informational?style=flat-square)
 
 Docmost is an open-source collaborative wiki and documentation software. It is an open-source alternative to Confluence and Notion.
 
@@ -16,6 +16,16 @@ Docmost is an open-source collaborative wiki and documentation software. It is a
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
 | docmost.appUrl | string | `""` | docmost externally accessible URL |
+| docmost.drawIO.url | string | `""` | Custom draw.io server url. |
+| docmost.smtp.auth.existingSecret | string | `""` | An existing secret containing the SMTP server username and password. |
+| docmost.smtp.auth.password | string | `""` | The password for the SMTP server. |
+| docmost.smtp.auth.username | string | `""` | The username for the SMTP server. |
+| docmost.smtp.enabled | bool | `false` | Should SMTP be enabled? |
+| docmost.smtp.host | string | `""` | The SMTP server to use for sending emails. |
+| docmost.smtp.mailFrom.address | string | `""` | The email address from which emails will be sent. |
+| docmost.smtp.mailFrom.name | string | `"Docmost"` | The name associated with the email address from which emails will be sent. |
+| docmost.smtp.port | int | `587` | The port to use for the SMTP server. |
+| docmost.smtp.secure | bool | `false` | Use TLS when connecting to the server, typically for port 465. See nodemailer 'secure' for details |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"docmost/docmost"` |  |

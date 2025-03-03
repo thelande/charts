@@ -80,6 +80,30 @@ spec:
                   key: appSecret
             - name: REDIS_URL
               value: {{ (required "A redis URL is required" .Values.redis.url) | quote }}
+            {{- if .Values.docmost.smtp.enabled }}
+            - name: MAIL_DRIVER
+              value: smtp
+            - name: SMTP_HOST
+              value: {{ (required "SMTP host is required." .Values.docmost.smtp.host) | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.docmost.smtp.port }}
+            - name: SMTP_SECURE
+              value: {{ .Values.docmost.smtp.secure | quote }}
+            - name: MAIL_FROM_ADDRESS
+              value: {{ (required "Mail from address is required." .Values.docmost.smtp.mailFrom.address) | quote }}
+            - name: MAIL_FROM_NAME
+              value: {{ (required "Mail from name is required." .Values.docmost.smtp.mailFrom.name) | quote }}
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "docmost.smtp.auth.secretName" . }}
+                  key: username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "docmost.smtp.auth.secretName" . }}
+                  key: password
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: /app/data/storage
