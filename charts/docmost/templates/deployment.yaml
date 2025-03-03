@@ -86,7 +86,7 @@ spec:
             - name: SMTP_HOST
               value: {{ (required "SMTP host is required." .Values.docmost.smtp.host) | quote }}
             - name: SMTP_PORT
-              value: {{ .Values.docmost.smtp.port }}
+              value: {{ .Values.docmost.smtp.port | quote }}
             - name: SMTP_SECURE
               value: {{ .Values.docmost.smtp.secure | quote }}
             - name: MAIL_FROM_ADDRESS
