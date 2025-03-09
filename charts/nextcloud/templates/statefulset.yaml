@@ -46,14 +46,12 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          {{- if .Values.persistence.enabled }}
             - name: {{ include "nextcloud.fullname" . }}-data
               mountPath: /var/www/html
-          {{- end }}
             - name: database-config
               mountPath: /config/database
               readOnly: true
-            - name: nextcloud-auth
+            - name: {{ include "nextcloud.fullname" . }}-auth
               mountPath: /config/auth
               readOnly: true
           {{- with .Values.volumeMounts }}
@@ -157,13 +155,45 @@ spec:
           {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        - name: cron
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}-apache"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/cron.sh"]
+          resources:
+            {{- toYaml .Values.cron.resources | nindent 12 }}
+          volumeMounts:
+            - name: {{ include "nextcloud.fullname" . }}-data
+              mountPath: /var/www/html
+          {{- with .Values.cron.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NEXTCLOUD_DATA_DIR
+              value: {{ .Values.nextcloud.dataDir | quote }}
+          {{- if .Values.nextcloud.php.memoryLimit }}
+            - name: PHP_MEMORY_LIMIT
+              value: {{ .Values.nextcloud.php.memoryLimit | quote }}
+          {{- end }}
+          {{- if .Values.nextcloud.php.uploadLimit }}
+            - name: PHP_UPLOAD_LIMIT
+              value: {{ .Values.nextcloud.php.uploadLimit | quote }}
+          {{- end }}
+          {{- with .Values.cron.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
         - name: database-config
           secret:
             secretName: {{ .Values.nextcloud.database.existingSecret }}
-        - name: nextcloud-auth
+        - name: {{ include "nextcloud.fullname" . }}-auth
           secret:
             secretName: {{ include "nextcloud.auth.secretName" . }}
+      {{- if not .Values.persistence.enabled }}
+        - name: {{ include "nextcloud.fullname" . }}-data
+          emptyDir: {}
+      {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

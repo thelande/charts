@@ -16,6 +16,9 @@ Nextcloud server, a safe home for all your data
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
+| cron.env | object | `{}` |  |
+| cron.resources | object | `{}` |  |
+| cron.volumeMounts | list | `[]` |  |
 | env | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
