@@ -102,14 +102,14 @@ spec:
               value: {{ .host | quote }}
             - name: REDIS_HOST_PORT
               value: {{ .port | quote }}
-          {{- if or .password .existingSecret }}
+          {{- end }}{{/* with .Values.nextcloud.redis */}}
+          {{- if or .Values.nextcloud.redi.password .Values.nextcloud.redi.existingSecret }}
             - name: REDIS_HOST_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nextcloud.redis.secretName" . }}
                   key: password
-          {{- end }}{{/* if or .password .existingSecret */}}
-          {{- end }}{{/* with .Values.nextcloud.redis */}}
+          {{- end }}{{/* if or .Values.nextcloud.redi.password .Values.nextcloud.redi.existingSecret */}}
           {{- end }}{{/* if .Values.nextcloud.redis.enabled */}}
           {{- if .Values.nextcloud.smtp.enabled }}
           {{- with .Values.nextcloud.smtp }}
@@ -162,15 +162,13 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- with .Values.persistence }}
-  {{- if .enabled }}
+  {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
         name: {{ include "nextcloud.fullname" . }}-data
       spec:
-        accessModes: {{ .accessModes }}
-        storageClassName: {{ .storageClassName }}
+        accessModes: {{ .Values.persistence.accessModes }}
+        storageClassName: {{ .Values.persistence.storageClassName }}
         resources:
-          {{- toYaml .resources | nindent 10 }}
-  {{- end }}
+          {{- toYaml .Values.persistence.resources | nindent 10 }}
   {{- end }}
