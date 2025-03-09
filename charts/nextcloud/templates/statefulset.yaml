@@ -123,6 +123,15 @@ spec:
               value: {{ .port | quote }}
             - name: SMTP_AUTHTYPE
               value: {{ .authType | quote }}
+          {{- if .fromAddress }}
+            - name: MAIL_FROM_ADDRESS
+              value: {{ .fromAddress | quote }}
+          {{- end }}
+          {{- if .domain }}
+            - name: MAIL_DOMAIN
+              value: {{ .domain | quote }}
+          {{- end }}
+          {{- end }}{{/* with .Values.nextcloud.smtp */}}
             - name: SMTP_NAME
               valueFrom:
                 secretKeyRef:
@@ -133,15 +142,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "nextcloud.smtp.secretName" . }}
                   key: password
-          {{- if .fromAddress }}
-            - name: MAIL_FROM_ADDRESS
-              value: {{ .fromAddress | quote }}
-          {{- end }}
-          {{- if .domain }}
-            - name: MAIL_DOMAIN
-              value: {{ .domain | quote }}
-          {{- end }}
-          {{- end }}{{/* with .Values.nextcloud.smtp */}}
           {{- end }}{{/* if .Values.nextcloud.smtp.enabled */}}
       volumes:
         - name: database-config
