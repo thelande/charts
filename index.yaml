@@ -158,6 +158,20 @@ entries:
   nextcloud:
   - apiVersion: v2
     appVersion: 31.0.0
+    created: "2025-03-09T17:25:53.203329651Z"
+    description: Nextcloud server, a safe home for all your data
+    digest: 6c717bcb78f28e9ed61a234dce736ce116715ef70fc5a97d9e3da7cc7bd4054c
+    home: https://nextcloud.com/
+    name: nextcloud
+    sources:
+    - https://github.com/nextcloud/server
+    - https://github.com/nextcloud/docker
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/nextcloud-0.1.4/nextcloud-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 31.0.0
     created: "2025-03-09T17:16:30.339902905Z"
     description: Nextcloud server, a safe home for all your data
     digest: d1903cb2d0ef3ab436d71b48719b7ab250426008aa67dd3e6f42c9383c6e8e8c
@@ -376,4 +390,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-09T17:16:30.33996444Z"
+generated: "2025-03-09T17:25:53.203388491Z"
