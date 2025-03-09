@@ -106,13 +106,13 @@ spec:
             - name: REDIS_HOST_PORT
               value: {{ .port | quote }}
           {{- end }}{{/* with .Values.nextcloud.redis */}}
-          {{- if or .Values.nextcloud.redi.password .Values.nextcloud.redi.existingSecret }}
+          {{- if or .Values.nextcloud.redis.password .Values.nextcloud.redis.existingSecret }}
             - name: REDIS_HOST_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "nextcloud.redis.secretName" . }}
                   key: password
-          {{- end }}{{/* if or .Values.nextcloud.redi.password .Values.nextcloud.redi.existingSecret */}}
+          {{- end }}{{/* if or .Values.nextcloud.redis.password .Values.nextcloud.redis.existingSecret */}}
           {{- end }}{{/* if .Values.nextcloud.redis.enabled */}}
           {{- if .Values.nextcloud.smtp.enabled }}
           {{- with .Values.nextcloud.smtp }}
