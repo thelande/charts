@@ -53,6 +53,9 @@ spec:
             - name: database-config
               mountPath: /config/database
               readOnly: true
+            - name: nextcloud-auth
+              mountPath: /config/auth
+              readOnly: true
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -65,8 +68,11 @@ spec:
               value: /config/database/username
             - name: POSTGRES_PASSWORD_FILE
               value: /config/database/password
-            - name: POSTGRES_HOST_FILE
-              value: /config/database/host
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .existingSecret }}
+                  key: host
           {{- else if eq .type "mysql" }}
             - name: MYSQL_DB_FILE
               value: /config/database/dbname
@@ -74,22 +80,19 @@ spec:
               value: /config/database/username
             - name: MYSQL_PASSWORD_FILE
               value: /config/database/password
-            - name: MYSQL_HOST_FILE
-              value: /config/database/host
+            - name: MYSQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .existingSecret }}
+                  key: host
           {{- else }}
           {{- fail printf "Invalid database type: %s" .type }}
           {{- end }}
-          {{- end }}
-            - name: NEXTCLOUD_ADMIN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nextcloud.auth.secretName" . }}
-                  key: username
+          {{- end }}{{/* with .Values.nextcloud.database */}}
+            - name: NEXTCLOUD_ADMIN_USER_FILE
+              value: /config/auth/username
             - name: NEXTCLOUD_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "nextcloud.auth.secretName" . }}
-                  key: password
+              value: /config/auth/password
             - name: NEXTCLOUD_DATA_DIR
               value: {{ .Values.nextcloud.dataDir | quote }}
           {{- if .Values.nextcloud.trustedDomains }}
@@ -150,6 +153,9 @@ spec:
         - name: database-config
           secret:
             secretName: {{ .Values.nextcloud.database.existingSecret }}
+        - name: nextcloud-auth
+          secret:
+            secretName: {{ include "nextcloud.auth.secretName" . }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
