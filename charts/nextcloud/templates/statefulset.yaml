@@ -143,6 +143,9 @@ spec:
                   name: {{ include "nextcloud.smtp.secretName" . }}
                   key: password
           {{- end }}{{/* if .Values.nextcloud.smtp.enabled */}}
+          {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
         - name: database-config
           secret:
