@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nextcloud.fullname" . }}
+  labels:
+    {{- include "nextcloud.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "nextcloud.fullname" . }}-headless
+  selector:
+    matchLabels:
+      {{- include "nextcloud.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nextcloud.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nextcloud.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}-fpm"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.persistence.enabled }}
+            - name: {{ include "nextcloud.fullname" . }}-data
+              mountPath: /var/www/html
+          {{- end }}
+            - name: database-config
+              mountPath: /config/database
+              readOnly: true
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+          {{- with .Values.nextcloud.database }}
+          {{- if eq .type "postgres" }}
+            - name: POSTGRES_DB_FILE
+              value: /config/database/dbname
+            - name: POSTGRES_USER_FILE
+              value: /config/database/username
+            - name: POSTGRES_PASSWORD_FILE
+              value: /config/database/password
+            - name: POSTGRES_HOST_FILE
+              value: /config/database/host
+          {{- else if eq .type "mysql" }}
+            - name: MYSQL_DB_FILE
+              value: /config/database/dbname
+            - name: MYSQL_USER_FILE
+              value: /config/database/username
+            - name: MYSQL_PASSWORD_FILE
+              value: /config/database/password
+            - name: MYSQL_HOST_FILE
+              value: /config/database/host
+          {{- else }}
+          {{- fail printf "Invalid database type: %s" .type }}
+          {{- end }}
+          {{- end }}
+            - name: NEXTCLOUD_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nextcloud.auth.secretName" . }}
+                  key: username
+            - name: NEXTCLOUD_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nextcloud.auth.secretName" . }}
+                  key: password
+            - name: NEXTCLOUD_DATA_DIR
+              value: {{ .Values.nextcloud.dataDir | quote }}
+          {{- if .Values.nextcloud.trustedDomains }}
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              value: {{ join " " .Values.nextcloud.trustedDomains | quote }}
+          {{- end }}
+          {{- if .Values.nextcloud.redis.enabled }}
+          {{- with .Values.nextcloud.redis }}
+            - name: REDIS_HOST
+              value: {{ .host | quote }}
+            - name: REDIS_HOST_PORT
+              value: {{ .port | quote }}
+          {{- if or .password .existingSecret }}
+            - name: REDIS_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nextcloud.redis.secretName" . }}
+                  key: password
+          {{- end }}{{/* if or .password .existingSecret */}}
+          {{- end }}{{/* with .Values.nextcloud.redis */}}
+          {{- end }}{{/* if .Values.nextcloud.redis.enabled */}}
+          {{- if .Values.nextcloud.smtp.enabled }}
+          {{- with .Values.nextcloud.smtp }}
+            - name: SMTP_HOST
+              value: {{ .host | quote }}
+          {{- if .secure }}
+            - name: SMTP_SECURE
+              value: {{ .secure | quote }}
+          {{- end }}
+            - name: SMTP_PORT
+              value: {{ .port | quote }}
+            - name: SMTP_AUTHTYPE
+              value: {{ .authType | quote }}
+            - name: SMTP_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nextcloud.smtp.secretName" . }}
+                  key: username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nextcloud.smtp.secretName" . }}
+                  key: password
+          {{- if .fromAddress }}
+            - name: MAIL_FROM_ADDRESS
+              value: {{ .fromAddress | quote }}
+          {{- end }}
+          {{- if .domain }}
+            - name: MAIL_DOMAIN
+              value: {{ .domain | quote }}
+          {{- end }}
+          {{- end }}{{/* with .Values.nextcloud.smtp */}}
+          {{- end }}{{/* if .Values.nextcloud.smtp.enabled */}}
+      volumes:
+        - name: database-config
+          secret:
+            secretName: {{ .Values.nextcloud.database.existingSecret }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- with .Values.persistence }}
+  {{- if .enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "nextcloud.fullname" . }}-data
+      spec:
+        accessModes: {{ .accessModes }}
+        storageClassName: {{ .storageClassName }}
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+  {{- end }}
+  {{- end }}

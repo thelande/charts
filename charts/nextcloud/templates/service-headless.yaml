@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nextcloud.fullname" . }}-headless
+  labels:
+    {{- include "nextcloud.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  clusterIP: None
+  selector:
+    {{- include "nextcloud.selectorLabels" . | nindent 4 }}
