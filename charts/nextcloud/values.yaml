@@ -91,14 +91,14 @@ livenessProbe:
   httpGet:
     path: /status.php
     port: http
-  periodSeconds: 60s
-  timeoutSeconds: 10s
+  periodSeconds: 60
+  timeoutSeconds: 10
 readinessProbe:
   httpGet:
     path: /status.php
     port: http
-  periodSeconds: 60s
-  timeoutSeconds: 10s
+  periodSeconds: 60
+  timeoutSeconds: 10
 
 # Additional volumes on the output Deployment definition.
 volumes: []

@@ -1,6 +1,6 @@
 # nextcloud
 
-![Version: 0.1.10](https://img.shields.io/badge/Version-0.1.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
+![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
 
 Nextcloud server, a safe home for all your data
 
@@ -31,8 +31,8 @@ Nextcloud server, a safe home for all your data
 | ingress.tls | list | `[]` |  |
 | livenessProbe.httpGet.path | string | `"/status.php"` |  |
 | livenessProbe.httpGet.port | string | `"http"` |  |
-| livenessProbe.periodSeconds | string | `"60s"` |  |
-| livenessProbe.timeoutSeconds | string | `"10s"` |  |
+| livenessProbe.periodSeconds | int | `60` |  |
+| livenessProbe.timeoutSeconds | int | `10` |  |
 | nameOverride | string | `""` |  |
 | nextcloud.auth.existingSecret | string | `""` | Secret containing the admin username and password. |
 | nextcloud.auth.password | string | `"nextcloud"` | Password for the Nextcloud admin user. Ignored if existingSecret is set. |
@@ -68,8 +68,8 @@ Nextcloud server, a safe home for all your data
 | podSecurityContext | object | `{}` |  |
 | readinessProbe.httpGet.path | string | `"/status.php"` |  |
 | readinessProbe.httpGet.port | string | `"http"` |  |
-| readinessProbe.periodSeconds | string | `"60s"` |  |
-| readinessProbe.timeoutSeconds | string | `"10s"` |  |
+| readinessProbe.periodSeconds | int | `60` |  |
+| readinessProbe.timeoutSeconds | int | `10` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
 | securityContext | object | `{}` |  |
