@@ -1,6 +1,6 @@
 # nextcloud
 
-![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
+![Version: 0.1.10](https://img.shields.io/badge/Version-0.1.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
 
 Nextcloud server, a safe home for all your data
 
@@ -29,7 +29,7 @@ Nextcloud server, a safe home for all your data
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
 | ingress.tls | list | `[]` |  |
-| livenessProbe.httpGet.path | string | `"/login"` |  |
+| livenessProbe.httpGet.path | string | `"/status.php"` |  |
 | livenessProbe.httpGet.port | string | `"http"` |  |
 | livenessProbe.periodSeconds | string | `"60s"` |  |
 | livenessProbe.timeoutSeconds | string | `"10s"` |  |
@@ -66,7 +66,7 @@ Nextcloud server, a safe home for all your data
 | podAnnotations | object | `{}` |  |
 | podLabels | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| readinessProbe.httpGet.path | string | `"/login"` |  |
+| readinessProbe.httpGet.path | string | `"/status.php"` |  |
 | readinessProbe.httpGet.port | string | `"http"` |  |
 | readinessProbe.periodSeconds | string | `"60s"` |  |
 | readinessProbe.timeoutSeconds | string | `"10s"` |  |
