@@ -91,14 +91,14 @@ livenessProbe:
   httpGet:
     path: /
     port: http
-    period: 60s
-    timeout: 10s
+    periodSeconds: 60s
+    timeoutSeconds: 10s
 readinessProbe:
   httpGet:
     path: /
     port: http
-    period: 60s
-    timeout: 10s
+    periodSeconds: 60s
+    timeoutSeconds: 10s
 
 # Additional volumes on the output Deployment definition.
 volumes: []
