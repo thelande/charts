@@ -146,6 +146,14 @@ spec:
                   name: {{ include "nextcloud.smtp.secretName" . }}
                   key: password
           {{- end }}{{/* if .Values.nextcloud.smtp.enabled */}}
+          {{- if .Values.nextcloud.php.memoryLimit }}
+            - name: PHP_MEMORY_LIMIT
+              value: {{ .Values.nextcloud.php.memoryLimit | quote }}
+          {{- end }}
+          {{- if .Values.nextcloud.php.uploadLimit }}
+            - name: PHP_UPLOAD_LIMIT
+              value: {{ .Values.nextcloud.php.uploadLimit | quote }}
+          {{- end }}
           {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
