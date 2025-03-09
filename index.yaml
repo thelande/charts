@@ -155,6 +155,21 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/local-path-provisioner-0.0.29/local-path-provisioner-0.0.29.tgz
     version: 0.0.29
+  nextcloud:
+  - apiVersion: v2
+    appVersion: 31.0.0
+    created: "2025-03-09T00:27:43.848441144Z"
+    description: Nextcloud server, a safe home for all your data
+    digest: 9d1c5b56eef3e2424690fb7bae69692907268ba0e7c62a8b6bcf2a8f675f7062
+    home: https://nextcloud.com/
+    name: nextcloud
+    sources:
+    - https://github.com/nextcloud/server
+    - https://github.com/nextcloud/docker
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/nextcloud-0.1.0/nextcloud-0.1.0.tgz
+    version: 0.1.0
   openmeteo-exporter:
   - apiVersion: v2
     appVersion: v1.0.3
@@ -319,4 +334,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-03-03T00:31:06.393617216Z"
+generated: "2025-03-09T00:27:43.848494694Z"
