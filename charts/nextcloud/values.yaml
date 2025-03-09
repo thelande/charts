@@ -211,7 +211,7 @@ nextcloud:
     username: admin
 
     # -- Password for the Nextcloud admin user. Ignored if existingSecret is set.
-    password: nextcloud
+    password: nextcl0ud123
 
     # -- Secret containing the admin username and password.
     existingSecret: ""

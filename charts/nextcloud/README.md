@@ -1,6 +1,6 @@
 # nextcloud
 
-![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
+![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
 
 Nextcloud server, a safe home for all your data
 
@@ -35,7 +35,7 @@ Nextcloud server, a safe home for all your data
 | livenessProbe.timeoutSeconds | int | `10` |  |
 | nameOverride | string | `""` |  |
 | nextcloud.auth.existingSecret | string | `""` | Secret containing the admin username and password. |
-| nextcloud.auth.password | string | `"nextcloud"` | Password for the Nextcloud admin user. Ignored if existingSecret is set. |
+| nextcloud.auth.password | string | `"nextcl0ud123"` | Password for the Nextcloud admin user. Ignored if existingSecret is set. |
 | nextcloud.auth.username | string | `"admin"` | Name of the Nextcloud admin user. Ignored if existingSecret is set. |
 | nextcloud.dataDir | string | `"/var/www/html/data"` | Configures the data directory where nextcloud stores all files from the users. |
 | nextcloud.database.existingSecret | string | `""` | The existing secret containing the database connection details. Must have the following keys: host, username, password, and dbname. |
