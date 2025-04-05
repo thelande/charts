@@ -88,15 +88,23 @@ resources: {}
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
-  httpGet:
-    path: /status.php
-    port: http
+  exec:
+    command:
+      - bash
+      - -c
+      - |
+        PHP_MEMORY_LIMIT=512M su -l www-data -w PHP_MEMORY_LIMIT \
+          -s /usr/local/bin/php /var/www/html/occ status | grep -q "installed: true"
   periodSeconds: 60
   timeoutSeconds: 10
 readinessProbe:
-  httpGet:
-    path: /status.php
-    port: http
+  exec:
+    command:
+      - bash
+      - -c
+      - |
+        PHP_MEMORY_LIMIT=512M su -l www-data -w PHP_MEMORY_LIMIT \
+          -s /usr/local/bin/php /var/www/html/occ status | grep -q "installed: true"
   periodSeconds: 60
   timeoutSeconds: 10
 
