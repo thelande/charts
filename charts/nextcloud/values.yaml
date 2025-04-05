@@ -158,6 +158,10 @@ nextcloud:
   # -- Optional list of trusted domains.
   trustedDomains: []
 
+  # -- Optional list of trusted proxies. Should contain the service CIDR(s) for
+  # your cluster.
+  trustedProxies: []
+
   # -- Configures the data directory where nextcloud stores all files from the users.
   dataDir: /var/www/html/data
 

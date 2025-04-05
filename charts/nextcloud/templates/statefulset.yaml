@@ -97,6 +97,10 @@ spec:
             - name: NEXTCLOUD_TRUSTED_DOMAINS
               value: {{ join " " .Values.nextcloud.trustedDomains | quote }}
           {{- end }}
+          {{- if .Values.nextcloud.trustedProxies }}
+            - name: TRUSTED_PROXIES
+              value: {{ join " " .Values.nextcloud.trustedProxies | quote }}
+          {{- end }}
           {{- if .Values.nextcloud.redis.enabled }}
           {{- with .Values.nextcloud.redis }}
             - name: REDIS_HOST
