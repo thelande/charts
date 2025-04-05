@@ -89,7 +89,7 @@ spec:
           {{- end }}{{/* with .Values.nextcloud.database */}}
             - name: NEXTCLOUD_ADMIN_USER_FILE
               value: /config/auth/username
-            - name: NEXTCLOUD_ADMIN_PASSWORD
+            - name: NEXTCLOUD_ADMIN_PASSWORD_FILE
               value: /config/auth/password
             - name: NEXTCLOUD_DATA_DIR
               value: {{ .Values.nextcloud.dataDir | quote }}
