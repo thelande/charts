@@ -249,6 +249,37 @@ nextcloud:
 codeServer:
   enabled: false
 
-  # env:
-  #   - name: aliasgroup1
-  #     value: http://chart-example.local
+  ingress:
+    enabled: false
+    # className: ""
+    # annotations:
+    #   nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_WOPISrc"
+    #   nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    #   nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    #   nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    # hosts:
+    #   - host: chart-example.local
+    #     paths:
+    #       - path: /
+    #         pathType: ImplementationSpecific
+    # tls: []
+    # #  - secretName: chart-example-tls
+    # #    hosts:
+    # #      - chart-example.local
+
+  autoscaling: false
+
+  # collabora:
+  #   aliasgroups:
+  #     - host: "chart-example.local"
+  #   extra_params: --o:ssl.enable=false --o:ssl.termination=true
+  #   # -- Specify server_name when the hostname is not reachable directly for example behind reverse-proxy
+  #   server_name: "<hostname>:<port>"
+
+  # resources:
+  #   limits:
+  #     cpu: "1800m"
+  #     memory: "2000Mi"
+  #   requests:
+  #     cpu: "1800m"
+  #     memory: "2000Mi"

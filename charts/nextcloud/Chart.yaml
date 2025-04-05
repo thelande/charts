@@ -21,7 +21,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.3.0
+version: 0.3.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -30,7 +30,7 @@ version: 0.3.0
 appVersion: "31.0.0"
 
 dependencies:
-  - name: code
-    version: 0.1.0
-    repository: https://thelande.github.io/charts
+  - name: collabora-online
+    version: 1.1.36
+    repository: https://collaboraonline.github.io/online/
     condition: codeServer.enabled
