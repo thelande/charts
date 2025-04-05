@@ -22,6 +22,21 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/apcupsd-exporter-0.1.0/apcupsd-exporter-0.1.0.tgz
     version: 0.1.0
+  code:
+  - apiVersion: v2
+    appVersion: 24.04.13.2.1
+    created: "2025-04-05T23:28:08.262620678Z"
+    description: 'Collabora Online Development Edition – an awesome, Online Office
+      suite image suitable for home use. '
+    digest: 8da308592dece69eb0500f9ffb11db24594769fccaef318077166e1ca0e6a70c
+    home: https://www.collaboraonline.com/code/
+    name: code
+    sources:
+    - https://github.com/CollaboraOnline/online
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/code-0.1.0/code-0.1.0.tgz
+    version: 0.1.0
   csmm:
   - apiVersion: v2
     appVersion: 0.1.0
@@ -530,4 +545,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-05T23:12:23.753380694Z"
+generated: "2025-04-05T23:28:08.262674318Z"
