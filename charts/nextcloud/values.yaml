@@ -244,3 +244,11 @@ nextcloud:
 
     # -- Secret containing the admin username and password.
     existingSecret: ""
+
+# -- Configuration of the Collabora Online Development Edition (CODE) server
+codeServer:
+  enabled: false
+
+  # env:
+  #   - name: aliasgroup1
+  #     value: http://chart-example.local
