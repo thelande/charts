@@ -162,6 +162,9 @@ nextcloud:
   # your cluster.
   trustedProxies: []
 
+  # -- Optional overwrite of the protocol used (http or https).
+  overwriteProtocol: ""
+
   # -- Configures the data directory where nextcloud stores all files from the users.
   dataDir: /var/www/html/data
 

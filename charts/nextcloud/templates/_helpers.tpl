@@ -126,6 +126,10 @@ Name of the secret containing the smtp credentials.
 - name: TRUSTED_PROXIES
   value: {{ join " " .Values.nextcloud.trustedProxies | quote }}
 {{- end }}
+{{- if .Values.nextcloud.overwriteProtocol }}
+- name: OVERWRITEPROTOCOL
+  value: {{ .Values.nextcloud.overwriteProtocol | quote }}
+{{- end }}
 {{- if .Values.nextcloud.redis.enabled }}
 {{- with .Values.nextcloud.redis }}
 - name: REDIS_HOST
