@@ -267,7 +267,8 @@ collabora-online:
     # #    hosts:
     # #      - chart-example.local
 
-  autoscaling: false
+  autoscaling:
+    enabled: false
 
   # collabora:
   #   aliasgroups:
