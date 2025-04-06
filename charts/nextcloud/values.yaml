@@ -246,7 +246,7 @@ nextcloud:
     existingSecret: ""
 
 # -- Configuration of the Collabora Online Development Edition (CODE) server
-codeServer:
+collabora-online:
   enabled: false
 
   ingress:
