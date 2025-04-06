@@ -173,6 +173,26 @@ entries:
   nextcloud:
   - apiVersion: v2
     appVersion: 31.0.0
+    created: "2025-04-06T20:54:21.956303532Z"
+    dependencies:
+    - condition: collabora-online.enabled
+      name: collabora-online
+      repository: https://collaboraonline.github.io/online/
+      version: 1.1.36
+    description: Nextcloud server, a safe home for all your data
+    digest: 886fb883e132fbfc46166d7d7c42ff828ca4b1eb90ceffa60cd279bb9d45bb5f
+    home: https://nextcloud.com/
+    icon: https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/nextcloud.svg
+    name: nextcloud
+    sources:
+    - https://github.com/nextcloud/server
+    - https://github.com/nextcloud/docker
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/nextcloud-0.3.4/nextcloud-0.3.4.tgz
+    version: 0.3.4
+  - apiVersion: v2
+    appVersion: 31.0.0
     created: "2025-04-06T00:46:56.573806658Z"
     dependencies:
     - condition: collabora-online.enabled
@@ -625,4 +645,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-06T00:46:56.573923988Z"
+generated: "2025-04-06T20:54:21.95668613Z"
