@@ -1,6 +1,6 @@
 # nextcloud
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
+![Version: 0.3.4](https://img.shields.io/badge/Version-0.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 31.0.0](https://img.shields.io/badge/AppVersion-31.0.0-informational?style=flat-square)
 
 Nextcloud server, a safe home for all your data
 
@@ -11,11 +11,18 @@ Nextcloud server, a safe home for all your data
 * <https://github.com/nextcloud/server>
 * <https://github.com/nextcloud/docker>
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://collaboraonline.github.io/online/ | collabora-online | 1.1.36 |
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
+| collabora-online | object | `{"autoscaling":{"enabled":false},"enabled":false,"ingress":{"enabled":false}}` | Configuration of the Collabora Online Development Edition (CODE) server |
 | cron.env | object | `{}` |  |
 | cron.resources | object | `{}` |  |
 | cron.volumeMounts | list | `[]` |  |
@@ -32,8 +39,9 @@ Nextcloud server, a safe home for all your data
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
 | ingress.tls | list | `[]` |  |
-| livenessProbe.httpGet.path | string | `"/status.php"` |  |
-| livenessProbe.httpGet.port | string | `"http"` |  |
+| livenessProbe.exec.command[0] | string | `"bash"` |  |
+| livenessProbe.exec.command[1] | string | `"-c"` |  |
+| livenessProbe.exec.command[2] | string | `"PHP_MEMORY_LIMIT=512M su -l www-data -w PHP_MEMORY_LIMIT \\\n  -s /usr/local/bin/php /var/www/html/occ status | grep -q \"installed: true\"\n"` |  |
 | livenessProbe.periodSeconds | int | `60` |  |
 | livenessProbe.timeoutSeconds | int | `10` |  |
 | nameOverride | string | `""` |  |
@@ -43,6 +51,7 @@ Nextcloud server, a safe home for all your data
 | nextcloud.dataDir | string | `"/var/www/html/data"` | Configures the data directory where nextcloud stores all files from the users. |
 | nextcloud.database.existingSecret | string | `""` | The existing secret containing the database connection details. Must have the following keys: host, username, password, and dbname. |
 | nextcloud.database.type | string | `"postgres"` | The type of database to use. Either postgres or mysql. The database must created manually and is not handled by this chart. |
+| nextcloud.overwriteProtocol | string | `""` | Optional overwrite of the protocol used (http or https). |
 | nextcloud.php.memoryLimit | string | `""` | This sets the maximum amount of memory in bytes that a script is allowed to allocate. This is meant to help prevent poorly written scripts from eating up all available memory but it can prevent normal operation if set too tight. |
 | nextcloud.php.uploadLimit | string | `""` | This sets the upload limit (post_max_size and upload_max_filesize) for big files. Note that you may have to change other limits depending on your client, webserver or operating system. Check the Nextcloud documentation⁠ for more information. The ingress proxy limit must also be increased when using an ingress to access nextcloud (e.g., nginx.ingress.kubernetes.io/proxy-body-size). |
 | nextcloud.redis.enabled | bool | `false` | Should redis caching be used. |
@@ -61,6 +70,7 @@ Nextcloud server, a safe home for all your data
 | nextcloud.smtp.secure | string | `""` | Set to ssl to use SSL, or tls to use STARTTLS. |
 | nextcloud.smtp.username | string | `""` | The username for the authentication. Ignored if existingSecret is set. |
 | nextcloud.trustedDomains | list | `[]` | Optional list of trusted domains. |
+| nextcloud.trustedProxies | list | `[]` | Optional list of trusted proxies. Should contain the service CIDR(s) for your cluster. |
 | nodeSelector | object | `{}` |  |
 | persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | persistence.enabled | bool | `false` |  |
@@ -69,8 +79,9 @@ Nextcloud server, a safe home for all your data
 | podAnnotations | object | `{}` |  |
 | podLabels | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| readinessProbe.httpGet.path | string | `"/status.php"` |  |
-| readinessProbe.httpGet.port | string | `"http"` |  |
+| readinessProbe.exec.command[0] | string | `"bash"` |  |
+| readinessProbe.exec.command[1] | string | `"-c"` |  |
+| readinessProbe.exec.command[2] | string | `"PHP_MEMORY_LIMIT=512M su -l www-data -w PHP_MEMORY_LIMIT \\\n  -s /usr/local/bin/php /var/www/html/occ status | grep -q \"installed: true\"\n"` |  |
 | readinessProbe.periodSeconds | int | `60` |  |
 | readinessProbe.timeoutSeconds | int | `10` |  |
 | replicaCount | int | `1` |  |
