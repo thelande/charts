@@ -170,6 +170,27 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/local-path-provisioner-0.0.29/local-path-provisioner-0.0.29.tgz
     version: 0.0.29
+  mealie:
+  - apiVersion: v2
+    appVersion: v2.8.0
+    created: "2025-04-24T03:43:09.13607596Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 2.x.x
+    description: 'A self-hosted recipe manager and meal planner with a RestAPI backend
+      and a reactive frontend application built in Vue for a pleasant user experience
+      for the whole family. '
+    digest: 6364ab8bf8e0de779d0fa1bdeb0130e66b7805b357185499eaaf74ed4f08c714
+    home: https://docs.mealie.io/
+    name: mealie
+    sources:
+    - https://github.com/mealie-recipes/mealie/
+    - https://github.com/thelande/charts/
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/mealie-0.1.0/mealie-0.1.0.tgz
+    version: 0.1.0
   nextcloud:
   - apiVersion: v2
     appVersion: 31.0.0
@@ -645,4 +666,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-06T20:54:21.95668613Z"
+generated: "2025-04-24T03:43:09.261617982Z"
