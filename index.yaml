@@ -187,6 +187,26 @@ entries:
   mealie:
   - apiVersion: v2
     appVersion: v2.8.0
+    created: "2025-04-27T23:25:51.627230781Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 2.x.x
+    description: 'A self-hosted recipe manager and meal planner with a RestAPI backend
+      and a reactive frontend application built in Vue for a pleasant user experience
+      for the whole family. '
+    digest: 010664a6749ff4c42d2073823e8656d3dc9973bd9bb05a0e034ec7f42a44a759
+    home: https://mealie.io/
+    name: mealie
+    sources:
+    - https://github.com/mealie-recipes/mealie/
+    - https://github.com/thelande/charts/
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/mealie-0.2.0/mealie-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: v2.8.0
     created: "2025-04-27T23:04:50.259532241Z"
     dependencies:
     - name: common
@@ -720,4 +740,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-27T23:04:50.2596442Z"
+generated: "2025-04-27T23:25:51.627332923Z"
