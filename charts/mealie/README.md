@@ -1,6 +1,6 @@
 # mealie
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.8.0](https://img.shields.io/badge/AppVersion-v2.8.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.8.0](https://img.shields.io/badge/AppVersion-v2.8.0-informational?style=flat-square)
 
 A self-hosted recipe manager and meal planner with a RestAPI backend and a reactive frontend application built in Vue for a pleasant user experience for the whole family.
 
@@ -77,6 +77,7 @@ A self-hosted recipe manager and meal planner with a RestAPI backend and a react
 | mealie.oidc.userClaim | string | `"email"` | This is the claim which Mealie will use to look up an existing user by (e.g. "email", "preferred_username") |
 | mealie.oidc.userGroup | string | `""` | If specified, only users belonging to this group will be able to successfully authenticate, regardless of the OIDC_ADMIN_GROUP. For more information see https://docs.mealie.io/documentation/getting-started/authentication/oidc/#groups |
 | mealie.openAI | object | `{}` |  |
+| mealie.persistence | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","resources":{"requests":{"storage":"5Gi"}},"storageClassName":""}` | Persistence configuration |
 | mealie.postgresql.database | string | `"mealie"` | Name of the postgres database |
 | mealie.postgresql.existingSecret | string | `""` | Name of existing secret containing the PostgreSQL cluster details |
 | mealie.postgresql.host | string | `"postgres-rw"` | Name of the postgres host |
