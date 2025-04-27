@@ -90,6 +90,13 @@ Return the OIDC client secret name
 {{- end }}
 
 {{/*
+Name of the persistent volume claim
+*/}}
+{{- define "mealie.persistence.existingClaim" -}}
+{{ default (printf "%s-data" (include "common.names.fullname" .)) .Values.mealie.persistence.existingClaim }}
+{{- end }}
+
+{{/*
 Environment variables
 */}}
 {{- define "mealie.env" -}}

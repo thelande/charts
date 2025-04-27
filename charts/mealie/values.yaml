@@ -305,3 +305,14 @@ mealie:
   openAI: {}
 
   theming: {}
+
+  # -- Persistence configuration
+  persistence:
+    enabled: false
+    existingClaim: ""
+    storageClassName: ""
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: "5Gi"
+

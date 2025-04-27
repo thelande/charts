@@ -1,0 +1,16 @@
+{{- if .Values.mealie.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mealie.persistence.existingClaim" . }}
+  labels: {{ include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.mealie.persistence.accessModes | nindent 4 }}
+  resources:
+    {{- toYaml .Values.mealie.persistence.resources | nindent 4 }}
+  storageClassName: {{ .Values.mealie.persistence.storageClassName | quote }}
+{{- end }}
