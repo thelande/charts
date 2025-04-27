@@ -70,16 +70,16 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: mealie-data
+            - name: data
               mountPath: /app/data
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
-        - name: mealie-data
+        - name: data
           {{- if .Values.mealie.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{- include "mealie.persistence.existingClaim" . }}
+            claimName: {{ include "mealie.persistence.existingClaim" . }}
           {{- else }}
           emptyDir: {}
           {{- end }}
