@@ -5,7 +5,7 @@ description: >
   reactive frontend application built in Vue for a pleasant user experience for
   the whole family.
 
-home: https://docs.mealie.io/
+home: https://mealie.io/
 sources:
   - https://github.com/mealie-recipes/mealie/
   - https://github.com/thelande/charts/
