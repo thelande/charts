@@ -1,0 +1,277 @@
+{%- for component in components %}
+{{ component.values_section_name }}:
+  image:
+    # -- {{ component.values_section_name }} image registry
+    registry: {{ component.image.registry | default("docker.io", true) }}
+    # -- {{ component.values_section_name }} image repository
+    repository: {{ component.image.repository }}
+    # -- {{ component.values_section_name }} image tag
+    tag: {{ component.image.tag }}
+    # -- The image pull policy
+    # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets
+    # Secrets must be manually created in the namespace.
+    # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    pullSecrets: []
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+  
+  # -- Number of {{ component.values_section_name }} replicas to deploy
+  replicaCount: 1
+
+  # -- List of ports for {{ component.values_section_name }} containers
+  containerPorts: []
+  ## e.g:
+  ## containerPorts:
+  ##   - name: myservice
+  ##     containerPort: 9090
+  ##
+
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  livenessProbe:
+    # -- Enable livenessProbe on {{ component.values_section_name }} containers
+    enabled: true
+    # -- Initial delay seconds for livenessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for livenessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for livenessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for livenessProbe
+    failureThreshold: 3
+    # -- Success threshold for livenessProbe
+    successThreshold: 1
+
+  readinessProbe:
+    # -- Enable readinessProbe on {{ component.values_section_name }} containers
+    enabled: true
+    # -- Initial delay seconds for readinessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for readinessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for readinessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for readinessProbe
+    failureThreshold: 3
+    # -- Success threshold for readinessProbe
+    successThreshold: 1
+
+  startupProbe:
+    # -- Enable startupProbe on {{ component.values_section_name }} containers
+    enabled: false
+    # -- Initial delay seconds for startupProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for startupProbe
+    periodSeconds: 10
+    # -- Timeout seconds for startupProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for startupProbe
+    failureThreshold: 3
+    # -- Success threshold for startupProbe
+    successThreshold: 1
+  
+  # -- Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  # -- Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  # -- Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  ## {{ component.values_section_name }} resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  # -- Set {{ component.values_section_name }} container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if {{ component.values_section_name }}.resources is set ({{ component.values_section_name }}.resources is recommended for production).
+  # More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  resourcesPreset: "nano"
+  # -- Set {{ component.values_section_name }} container requests and limits for different resources like CPU or memory (essential for production workloads)
+  resources: {}
+  ## e.g:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext:
+    # -- Enable {{ component.values_section_name }} pods' Security Context
+    enabled: true
+    # -- Set filesystem group change policy for {{ component.values_section_name }} pods
+    fsGroupChangePolicy: Always
+    # -- settings using the sysctl interface for {{ component.values_section_name }} pods
+    sysctls: []
+    # -- Set filesystem extra groups for {{ component.values_section_name }} pods
+    supplementalGroups: []
+    # -- Set fsGroup in {{ component.values_section_name }} pods' Security Context
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext:
+    # -- Enabled {{ component.values_section_name }} container' Security Context
+    enabled: true
+    # -- Set SELinux options in {{ component.values_section_name }} container
+    seLinuxOptions: {}
+    # -- Set runAsUser in {{ component.values_section_name }} container' Security Context
+    runAsUser: 1001
+    runAsGroup: 1001
+    # -- Set runAsNonRoot in {{ component.values_section_name }} container' Security Context
+    runAsNonRoot: true
+    # -- Set readOnlyRootFilesystem in {{ component.values_section_name }} container' Security Context
+    readOnlyRootFilesystem: true
+    # -- Set privileged in {{ component.values_section_name }} container' Security Context
+    privileged: false
+    # -- Set allowPrivilegeEscalation in {{ component.values_section_name }} container' Security Context
+    allowPrivilegeEscalation: false
+    # -- List of capabilities to be dropped in {{ component.values_section_name }} container
+    capabilities:
+      drop: ["ALL"]
+    # -- Set seccomp profile in {{ component.values_section_name }} container
+    seccompProfile:
+      type: "RuntimeDefault"
+    
+  # -- Override default {{ component.values_section_name }} container command (useful when using custom images)
+  command: []
+  # -- Override default {{ component.values_section_name }} container args (useful when using custom images)
+  args: []
+  # -- Mount Service Account token in {{ component.values_section_name }} pods
+  automountServiceAccountToken: false
+  # -- Annotations for {{ component.values_section_name }}
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+  # -- {{ component.values_section_name }} pods host aliases
+  # ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  hostAliases: []
+
+  # -- Extra labels for {{ component.values_section_name }} pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+  # -- Annotations for {{ component.values_section_name }} pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # -- Pod affinity preset. Ignored if `{{ component.values_section_name }}.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinityPreset: ""
+  # -- Pod anti-affinity preset. Ignored if `{{ component.values_section_name }}.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAntiAffinityPreset: soft
+  ## Node {{ component.values_section_name }}.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinityPreset:
+    # -- Node affinity preset type. Ignored if `{{ component.values_section_name }}.affinity` is set. Allowed values: `soft` or `hard`
+    type: ""
+    # -- Node label key to match. Ignored if `{{ component.values_section_name }}.affinity` is set
+    key: ""
+    # -- Node label values to match. Ignored if `{{ component.values_section_name }}.affinity` is set
+    values: []
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+  # -- Affinity for {{ component.values_section_name }} pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # NOTE: `{{ component.values_section_name }}.podAffinityPreset`, `{{ component.values_section_name }}.podAntiAffinityPreset`, and `{{ component.values_section_name }}.nodeAffinityPreset` will be ignored when it's set
+  affinity: {}
+  # -- Node labels for {{ component.values_section_name }} pods assignment
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  nodeSelector: {}
+  # --Tolerations for {{ component.values_section_name }} pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+  # -- {{ component.type | title }} strategy type
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  {%- if component.type == "statefulset" %}
+  # -- Pod management policy for {{ component.values_section_name }} statefulset
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: OrderedReady
+  {%- endif %}
+  # -- Seconds {{ component.values_section_name }} pods need to terminate gracefully
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  terminationGracePeriodSeconds: ""
+  # -- Array with extra environment variables to add to {{ component.values_section_name }} containers
+  extraEnvVars: []
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+
+  # -- Name of existing ConfigMap containing extra env vars for {{ component.values_section_name }} containers
+  extraEnvVarsCM: ""
+  # -- Name of existing Secret containing extra env vars for {{ component.values_section_name }} containers
+  extraEnvVarsSecret: ""
+  # -- Optionally specify extra list of additional volumes for the {{ component.values_section_name }} pods
+  extraVolumes: []
+  # -- Optionally specify extra list of additional volumeMounts for the {{ component.values_section_name }} containers
+  extraVolumeMounts: []
+  # -- Add additional sidecar containers to the {{ component.values_section_name }} pods
+  sidecars: []
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+
+  # -- Add additional init containers to the {{ component.values_section_name }} pods
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  {%- if component.persistence %}
+  persistence:
+    # -- Enable persistence using Persistent Volume Claims
+    enabled: false
+    # -- Path to mount the volume at.
+    mountPath: /data/
+    # -- The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+    subPath: ""
+    # -- Storage class of backing PVC
+    # If defined, storageClassName: <storageClass>
+    # If set to "-", storageClassName: "", which disables dynamic provisioning
+    # If undefined (the default) or set to null, no storageClassName spec is
+    #   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    #   GKE, AWS & OpenStack)
+    storageClass: ""
+    # -- Persistent Volume Claim annotations
+    annotations: {}
+    # -- Persistent Volume Access Modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of data volume
+    size: 8Gi
+    # -- The name of an existing PVC to use for persistence
+    existingClaim: ""
+    # -- Selector to match an existing Persistent Volume for WordPress data PVC
+    # If set, the PVC can't have a PV dynamically provisioned for it
+    selector: {}
+    ## e.g.
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+
+    # -- Custom PVC data source
+    dataSource: {}
+  {%- endif %}
+{% endfor %}{# for component in components #}

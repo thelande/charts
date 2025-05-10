@@ -1,0 +1,58 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.ingress.[[ ingress.values_section_name ]].enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "[[ chart.chart_name ]].[[ ingress.service ]].fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: [[ ingress.service ]]
+  {{- if or .Values.ingress.[[ ingress.values_section_name ]].annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.ingress.[[ ingress.values_section_name ]].annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.ingress.[[ ingress.values_section_name ]].ingressClassName (eq "true" (include "common.ingress.supportsIngressClassname" .)) }}
+  ingressClassName: {{ .Values.ingress.[[ ingress.values_section_name ]].ingressClassName | quote }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.[[ ingress.values_section_name ]].hostname }}
+    - host: {{ .Values.ingress.[[ ingress.values_section_name ]].hostname }}
+      http:
+        paths:
+          {{- if .Values.ingress.[[ ingress.values_section_name ]].extraPaths }}
+          {{- toYaml .Values.ingress.[[ ingress.values_section_name ]].extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.ingress.[[ ingress.values_section_name ]].path }}
+            pathType: {{ .Values.ingress.[[ ingress.values_section_name ]].pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service ]].fullname" .) "servicePort" "[[ ingress.service_port_name ]]" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.ingress.[[ ingress.values_section_name ]].extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service ]].fullname" $) "servicePort" "[[ ingress.service_port_name ]]" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.ingress.[[ ingress.values_section_name ]].extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.[[ ingress.values_section_name ]].extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.ingress.[[ ingress.values_section_name ]].tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.[[ ingress.values_section_name ]].annotations )) .Values.ingress.[[ ingress.values_section_name ]].selfSigned)) .Values.ingress.[[ ingress.values_section_name ]].extraTls }}
+  tls:
+    {{- if and .Values.ingress.[[ ingress.values_section_name ]].tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.[[ ingress.values_section_name ]].annotations )) .Values.ingress.[[ ingress.values_section_name ]].selfSigned) }}
+    - hosts:
+        - {{ .Values.ingress.[[ ingress.values_section_name ]].hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.ingress.[[ ingress.values_section_name ]].hostname }}
+    {{- end }}
+    {{- if .Values.ingress.[[ ingress.values_section_name ]].extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.[[ ingress.values_section_name ]].extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

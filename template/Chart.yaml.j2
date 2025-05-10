@@ -1,0 +1,41 @@
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+annotations:
+  {%- if category %}
+  category: {{ category }}
+  {%- endif %}
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: {{ app_version }}
+dependencies:
+  {%- for chart in subcharts %}
+  - condition: {{ chart.name }}.enabled
+    name: {{ chart.name }}
+    repository: {{ chart.repository }}
+    version: {{ chart.version }}
+  {%- endfor %}
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: {{ description }}
+home: {{ homepage }}
+icon: {{ icon }}
+{%- if keywords %}
+keywords:
+  {%- for keyword in keywords %}
+  - {{ keyword }}
+  {%- endfor %}
+{%- endif %}
+maintainers:
+  - name: Thomas Helander
+    url: https://github.com/thelande/charts
+name: {{ chart_name }}
+sources:
+  - https://github.com/thelande/charts/tree/main/charts/{{ chart_name }}
+  {%- if app_source %}
+  - {{ app_source }}
+  {%- endif %}
+version: 0.1.0

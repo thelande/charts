@@ -1,0 +1,163 @@
+{#- The main values.yaml template. -#}
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+global:
+  # -- Global Docker image registry
+  imageRegistry: ""
+  ## e.g:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  
+  # -- Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+  # -- Global default StorageClass for Persistent Volume(s)
+  defaultStorageClass: ""
+
+  ## Security parameters
+  ##
+  security:
+    # -- Allows skipping image verification
+    allowInsecureImages: false
+
+## Common parameters
+##
+# -- Override Kubernetes version
+kubeVersion: ""
+# -- Override Kubernetes API versions reported by .Capabilities
+apiVersions: []
+# -- String to partially override common.names.name
+nameOverride: ""
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+# -- String to fully override common.names.namespace
+namespaceOverride: ""
+# -- Labels to add to all deployed objects
+commonLabels: {}
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+# -- Kubernetes cluster domain name
+clusterDomain: cluster.local
+
+## Diagnostic mode
+diagnosticMode:
+  # -- Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  enabled: false
+  # -- Command to override all containers in the chart release
+  command:
+    - sleep
+  # -- Args to override all containers in the chart release
+  args:
+    - infinity
+{% include "values/components.yaml.j2" %}
+
+{%- if services %}
+services:
+  {%- include "values/services.yaml.j2" %}
+{% endif %}
+
+{%- if ingresses %}
+ingress:
+  {%- include "values/ingresses.yaml.j2"%}
+{% endif %}{# if ingresses #}
+
+{%- if persistence %}
+persistence:
+  {%- for pvc in persistence %}
+  {{ pvc.values_section_name }}:
+    # -- Enable persistence using Persistent Volume Claims
+    enabled: false
+    # -- Path to mount the volume at.
+    mountPath: /data/{{ pvc.name }}
+    # -- The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+    subPath: ""
+    # -- Storage class of backing PVC
+    # If defined, storageClassName: <storageClass>
+    # If set to "-", storageClassName: "", which disables dynamic provisioning
+    # If undefined (the default) or set to null, no storageClassName spec is
+    #   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    #   GKE, AWS & OpenStack)
+    storageClass: ""
+    # -- Persistent Volume Claim annotations
+    annotations: {}
+    # -- Persistent Volume Access Modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of data volume
+    size: 8Gi
+    # -- The name of an existing PVC to use for persistence
+    existingClaim: ""
+    # -- Selector to match an existing Persistent Volume for WordPress data PVC
+    # If set, the PVC can't have a PV dynamically provisioned for it
+    selector: {}
+    ## e.g.
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+
+    # -- Custom PVC data source
+    dataSource: {}
+{%- endfor %}{#- for pvc in persistence #}
+{% endif %}{# if persistence #}
+
+{%- if "service-account" not in disabled_templates %}
+{% include "values/service-account.yaml.j2" %}
+{% endif %}{# if "service-account" not in disabled_templates #}
+
+{%- if "servicemonitor" not in disabled_templates %}
+## Prometheus metrics
+##
+metrics:
+  # -- Enable the export of Prometheus metrics
+  enabled: false
+  ## Prometheus Operator ServiceMonitor configuration
+  ##
+  serviceMonitor:
+    # -- If `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)
+    enabled: false
+    # -- Namespace in which Prometheus is running.
+    namespace: ""
+    #--  Additional custom annotations for the ServiceMonitor
+    annotations: {}
+    # -- Extra labels for the ServiceMonitor
+    labels: {}
+    # -- The name of the label on the target service to use as the job name in Prometheus
+    jobLabel: ""
+    # -- honorLabels chooses the metric's labels on collisions with target labels
+    honorLabels: false
+    # -- Interval at which metrics should be scraped.
+    # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    interval: ""
+    ## e.g:
+    ## interval: 10s
+    ##
+
+    # -- Timeout after which the scrape is ended
+    # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+    scrapeTimeout: ""
+    ## e.g:
+    ## scrapeTimeout: 10s
+    ##
+
+    # -- Specify additional relabeling of metrics
+    metricRelabelings: []
+    # -- Specify general relabeling
+    relabelings: []
+    # -- Prometheus instance selector labels
+    # ref: https://github.com/bitnami/charts/tree/main/bitnami/prometheus-operator#prometheus-configuration
+    selector: {}
+    ## selector:
+    ##   prometheus: my-prometheus
+    ##
+{% endif %}
+
+{%- for chart in subcharts %}
+{{ chart.name }}:
+  enabled: false
+{% endfor %}

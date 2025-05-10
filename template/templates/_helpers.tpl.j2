@@ -1,0 +1,61 @@
+{{/*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+{% for component in components %}
+{{/*
+Return the proper [[ component.name ]] name
+*/}}
+{{- define "[[ chart_name ]].[[ component.name ]].fullname" -}}
+{{ printf "%s-[[ component.name ]]" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+{% endfor %}
+{%- for component in components %}
+{{/*
+Return the proper [[ component.name ]] image name
+*/}}
+{{- define "[[ chart_name ]].[[ component.name ]].image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.[[ component.values_section_name ]].image "global" .Values.global) }}
+{{- end -}}
+{% endfor %}
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "[[ chart_name ]].imagePullSecrets" -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list{% for component in components %} .Values.[[ component.values_section_name ]].image{% endfor %}) "context" $) -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "[[ chart_name ]].serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+{% for ingress in ingresses %}
+{{/*
+Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
+Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+*/}}
+{{- define "[[ chart_name ]].ingress.[[ ingress.name ]].certManagerRequest" -}}
+{{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+{% endfor %}
+
+{{/*
+Compile all warnings into a single message.
+*/}}
+{{- define "[[ chart_name ]].validateValues" -}}
+{{- $messages := list -}}
+{{- $messages := without $messages "" -}}
+{{- $message := join "\n" $messages -}}
+
+{{- if $message -}}
+{{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
+{{- end -}}
+{{- end -}}

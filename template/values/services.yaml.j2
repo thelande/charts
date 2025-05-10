@@ -1,0 +1,52 @@
+{%- for service in services %}
+  {{ service.values_section_name }}:
+    # -- The service type
+    type: ClusterIP
+    
+    ports:
+      {%- for port in service.ports %}
+      - name: {{ port.name }}
+        port: {{ port.port }}
+        protocol: {{ port.protocol }}
+        {%- if port.target_port %}
+        targetPort: {{ port.target_port }}
+        {%- endif %}
+        {%- if port.node_port %}
+        nodePort: {{ port.node_port }}
+        {%- endif %}
+      {%- endfor %}
+    # -- {{ service.values_section_name }} service Cluster IP
+    clusterIP: ""
+    ## e.g.:
+    ## clusterIP: None
+
+    # -- {{ service.values_section_name }} service Load Balancer IP
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    loadBalancerIP: ""
+    # -- {{ service.values_section_name }} service Load Balancer sources
+    # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    loadBalancerSourceRanges: []
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+
+    # -- {{ service.values_section_name }} service external traffic policy
+    # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+    # -- Additional custom annotations for {{ service.values_section_name }} service
+    annotations: {}
+    # -- Extra ports to expose in {{ service.values_section_name }} service (normally used with the `sidecars` value)
+    extraPorts: []
+    # -- Control where client requests go, to the same pod or round-robin
+    # Values: ClientIP or None
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    sessionAffinity: None
+    # -- Additional settings for the sessionAffinity
+    sessionAffinityConfig: {}
+    ## e.g:
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+{%- endfor %}{#- for service in services #}
