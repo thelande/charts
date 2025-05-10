@@ -58,11 +58,16 @@ class ComponentType(str, Enum):
     STATEFULSET = "statefulset"
 
 
+class BasePortBlock(NamedBlock):
+    port: int
+
+
 class ComponentBlock(NamedBlock):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: ImageBlock
     type: ComponentType
+    ports: list[BasePortBlock]
     persistence: bool | None = None
 
     @model_validator(mode="after")
@@ -73,8 +78,7 @@ class ComponentBlock(NamedBlock):
         return self
 
 
-class ServicePortBlock(NamedBlock):
-    port: int
+class ServicePortBlock(BasePortBlock):
     target_port: int | None = None
     protocol: str = "TCP"
     node_port: int | None = None

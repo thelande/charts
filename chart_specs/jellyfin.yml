@@ -12,6 +12,9 @@ components:
     image:
       repository: jellyfin/jellyfin
       tag: '10.10.7'
+    ports:
+      - name: http
+        port: 8096
 
 services:
   - name: jellyfin

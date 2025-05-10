@@ -23,7 +23,11 @@
   replicaCount: 1
 
   # -- List of ports for {{ component.values_section_name }} containers
-  containerPorts: []
+  containerPorts:
+    {%- for port in component.ports %}
+    - name: {{ port.name }}
+      containerPort: {{ port.port }}
+    {%- endfor %}
   ## e.g:
   ## containerPorts:
   ##   - name: myservice
