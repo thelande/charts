@@ -9,6 +9,7 @@ app_source: https://github.com/jellyfin/jellyfin
 components:
   - name: jellyfin
     type: statefulset
+    persistence: true
     image:
       repository: jellyfin/jellyfin
       tag: '10.10.7'
@@ -29,9 +30,11 @@ persistence:
   - name: jellyfin-config
     component: jellyfin
     values_section_name: config
+    mount_path: /config
   - name: jellyfin-cache
     component: jellyfin
     values_section_name: cache
+    mount_path: /cache
 
 disabled_templates:
   - clusterrolebinding

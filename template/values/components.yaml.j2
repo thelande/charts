@@ -246,36 +246,5 @@
   persistence:
     # -- Enable persistence using Persistent Volume Claims
     enabled: false
-    # -- Path to mount the volume at.
-    mountPath: /data/
-    # -- The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
-    subPath: ""
-    # -- Storage class of backing PVC
-    # If defined, storageClassName: <storageClass>
-    # If set to "-", storageClassName: "", which disables dynamic provisioning
-    # If undefined (the default) or set to null, no storageClassName spec is
-    #   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    #   GKE, AWS & OpenStack)
-    storageClass: ""
-    # -- Persistent Volume Claim annotations
-    annotations: {}
-    # -- Persistent Volume Access Modes
-    accessModes:
-      - ReadWriteOnce
-    # -- Size of data volume
-    size: 8Gi
-    # -- The name of an existing PVC to use for persistence
-    existingClaim: ""
-    # -- Selector to match an existing Persistent Volume for WordPress data PVC
-    # If set, the PVC can't have a PV dynamically provisioned for it
-    selector: {}
-    ## e.g.
-    ## selector:
-    ##   matchLabels:
-    ##     app: my-app
-    ##
-
-    # -- Custom PVC data source
-    dataSource: {}
   {%- endif %}
 {% endfor %}{# for component in components #}

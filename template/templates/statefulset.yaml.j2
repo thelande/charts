@@ -140,6 +140,10 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {%- for pvc in pvcs %}
+            - name: [[ pvc.name ]]
+              mountPath: [[ pvc.mount_path ]]
+          {%- endfor %}
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
@@ -158,10 +162,11 @@ spec:
   {%- if component.persistence %}
   {{- if .Values.[[ component.values_section_name ]].persistence.enabled }}
   volumeClaimTemplates:
+    {%- for pvc in pvcs %}
     - metadata:
-        name: data
-        {{- if or .Values.[[ component.values_section_name ]].persistence.annotations .Values.commonAnnotations }}
-        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.[[ component.values_section_name ]].persistence.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        name: [[ pvc.name ]]
+        {{- if or .Values.persistence.[[ pvc.values_section_name ]].annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.[[ pvc.values_section_name ]].annotations .Values.commonAnnotations "context" .) | fromYaml }}
         annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
         {{- end }}
         {{- if .Values.commonLabels }}
@@ -169,15 +174,16 @@ spec:
         {{- end }}
       spec:
         accessModes:
-        {{- range .Values.[[ component.values_section_name ]].persistence.accessModes }}
+        {{- range .Values.persistence.[[ pvc.values_section_name ]].accessModes }}
           - {{ . | quote }}
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.[[ component.values_section_name ]].persistence.size | quote }}
-        {{- if .Values.[[ component.values_section_name ]].persistence.selector }}
-        selector: {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].persistence.selector "context" $) | nindent 10 }}
+            storage: {{ .Values.persistence.[[ pvc.values_section_name ]].size | quote }}
+        {{- if .Values.persistence.[[ pvc.values_section_name ]].selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.[[ pvc.values_section_name ]].selector "context" $) | nindent 10 }}
         {{- end }}
-        {{- include "common.storage.class" (dict "persistence" .Values.[[ component.values_section_name ]].persistence "global" .Values.global) | nindent 8 }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence.[[ pvc.values_section_name ]] "global" .Values.global) | nindent 8 }}
+    {%- endfor %}
   {{- end }}
   {%- endif %}

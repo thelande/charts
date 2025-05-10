@@ -105,6 +105,7 @@ class IngressBlock(NamedBlock):
 
 
 class PersistenceBlock(NamedBlock):
+    mount_path: str
     component: str | None = None  # Defaults to the PVC's `name` in model_post_init
 
     def model_post_init(self, context: Any) -> None:
@@ -246,13 +247,18 @@ class ChartDefinition(BaseModel):
                 raise ValueError(
                     f"PVC is not associated with a known component: {pvc.name}"
                 )
-
-            log.info(f"Rendering PVC: {pvc.name}")
-            pvc_filename = f"{pvc.name}-pvc.yaml"
-            context = {"chart": self, "pvc": pvc}
-            self._render_template(
-                "pvc.yaml.j2", Path("templates") / pvc_filename, env, context
-            )
+            
+            # Do not render the PVC if it belongs to a StatefulSet.
+            component = self.get_component_by_name(pvc.component)
+            if component.type != ComponentType.STATEFULSET:
+                log.info(f"Rendering PVC: {pvc.name}")
+                pvc_filename = f"{pvc.name}-pvc.yaml"
+                context = {"chart": self, "pvc": pvc}
+                self._render_template(
+                    "pvc.yaml.j2", Path("templates") / pvc_filename, env, context
+                )
+            else:
+                log.info(f"Skipping PVC that belongs to StatefulSet: {pvc.name}")
 
     def _render_components(self, env: Environment):
         """Render the deployment and statefulset helm templates."""
@@ -267,7 +273,8 @@ class ChartDefinition(BaseModel):
         for sts in statefulsets:
             log.info(f"Rendering StatefulSet: {sts.name}")
             deployment_filename = f"{sts.name}-statefulset.yaml"
-            context = {"chart": self, "component": sts}
+            pvcs = self.get_pvcs_for_component(sts.name)
+            context = {"chart": self, "component": sts, "pvcs": pvcs}
             self._render_template(
                 "statefulset.yaml.j2",
                 Path("templates") / deployment_filename,
@@ -281,7 +288,8 @@ class ChartDefinition(BaseModel):
         for deployment in deployments:
             log.info(f"Rendering Deployment: {deployment.name}")
             deployment_filename = f"{deployment.name}-deployment.yaml"
-            context = {"chart": self, "component": deployment}
+            pvcs = self.get_pvcs_for_component(deployment.name)
+            context = {"chart": self, "component": deployment, "pvcs": pvcs}
             self._render_template(
                 "deployment.yaml.j2",
                 Path("templates") / deployment_filename,
@@ -319,6 +327,33 @@ class ChartDefinition(BaseModel):
         Returns the list of component names.
         """
         return [c.name for c in self.components]
+    
+    def get_component_by_name(self, name: str) -> ComponentBlock:
+        """
+        Returns the named component, or raises a `ValueError` if no component
+        exists with the given name.
+
+        :param str name: The name of the component to return.
+        :raises: ValueError
+        :rtype: ComponentBlock
+        """
+        for component in self.components:
+            if component.name == name:
+                return component
+        raise ValueError(f"No component exists with name: {name}")
+    
+    def get_pvcs_for_component(self, name: str) -> list[PersistenceBlock]:
+        """
+        Returns a list of persistent blocks for the named component.
+
+        :param str name: The name of the component for which the blocks should be returned.
+        :rtype: list[PersistenceBlock]
+        """
+        pvcs = []
+        for pvc in self.persistence:
+            if pvc.component == name:
+                pvcs.append(pvc)
+        return pvcs
 
     def get_service_names(self) -> list[str]:
         """

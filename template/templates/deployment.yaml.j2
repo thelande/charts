@@ -138,6 +138,10 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {%- for pvc in pvcs %}
+            - name: [[ pvc.name ]]
+              mountPath: [[ pvc.mount_path ]]
+          {%- endfor %}
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
@@ -148,6 +152,11 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.[[ component.values_section_name ]].sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
+      {%- for pvc in pvcs %}
+        - name: [[ pvc.name ]]
+          persistentVolumeClaim:
+            claimName: {{ template "[[ chart.chart_name ]].[[ pvc.component ]].fullname" . }}
+      {%- endfor %}
         - name: empty-dir
           emptyDir: {}
         {{- if .Values.[[ component.values_section_name ]].extraVolumes }}
