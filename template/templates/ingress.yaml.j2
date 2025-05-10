@@ -16,9 +16,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.[[ ingress.values_section_name ]].ingressClassName (eq "true" (include "common.ingress.supportsIngressClassname" .)) }}
   ingressClassName: {{ .Values.ingress.[[ ingress.values_section_name ]].ingressClassName | quote }}
-  {{- end }}
   rules:
     {{- if .Values.ingress.[[ ingress.values_section_name ]].hostname }}
     - host: {{ .Values.ingress.[[ ingress.values_section_name ]].hostname }}
@@ -36,9 +34,7 @@ spec:
       http:
         paths:
           - path: {{ default "/" .path }}
-            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
             pathType: {{ default "ImplementationSpecific" .pathType }}
-            {{- end }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service ]].fullname" $) "servicePort" "[[ ingress.service_port_name ]]" "context" $) | nindent 14 }}
     {{- end }}
     {{- if .Values.ingress.[[ ingress.values_section_name ]].extraRules }}

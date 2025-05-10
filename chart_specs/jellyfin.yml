@@ -1,0 +1,45 @@
+chart_name: jellyfin
+app_version: 10.10.7
+description: The Free Software Media System - Server Backend & API.
+category: Media
+homepage: https://jellyfin.org/
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellyfin.png
+app_source: https://github.com/jellyfin/jellyfin
+
+components:
+  - name: jellyfin
+    type: statefulset
+    image:
+      repository: jellyfin/jellyfin
+      tag: '10.10.7'
+
+services:
+  - name: jellyfin
+    ports:
+      - name: http
+        port: 8096
+
+ingresses:
+  - name: jellyfin
+
+persistence:
+  - name: jellyfin-config
+    component: jellyfin
+    values_section_name: config
+  - name: jellyfin-cache
+    component: jellyfin
+    values_section_name: cache
+
+disabled_templates:
+  - clusterrolebinding
+  - configmap
+  - daemonset
+  - extra-list
+  - hpa
+  - networkpolicy
+  - pdb
+  - role
+  - servicemonitor
+  - statefulset
+  - tls-secret
+  - vpa
