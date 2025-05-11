@@ -10,7 +10,7 @@ The Free Software Media System - Server Backend & API.
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Thomas Helander |  | <https://github.com/thelande/charts> |
+| Tom Helander |  | <https://github.com/thelande/charts> |
 
 ## Source Code
 
@@ -39,7 +39,6 @@ The Free Software Media System - Server Backend & API.
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as an array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | global.security.allowInsecureImages | bool | `false` | Allows skipping image verification |
-| ingress.jellyfin | object | `{"annotations":{},"apiVersion":"","enabled":false,"extraHosts":[],"extraPaths":[],"extraRules":[],"extraTls":[],"hostname":"jellyfin.local","ingressClassName":"","path":"/","pathType":"ImplementationSpecific","secrets":[],"selfSigned":false,"tls":false}` | jellyfin ingress parameters ref: http://kubernetes.io/docs/concepts/services-networking/ingress/ |
 | ingress.jellyfin.annotations | object | `{}` | Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations. Use this parameter to set the required annotations for cert-manager, see ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations |
 | ingress.jellyfin.apiVersion | string | `""` | Force Ingress API version (automatically detected if not set) |
 | ingress.jellyfin.enabled | bool | `false` | Enable ingress record generation for jellyfin |

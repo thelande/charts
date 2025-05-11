@@ -342,7 +342,6 @@ services:
     ##
 
 ingress:
-  # -- jellyfin ingress parameters
   # ref: http://kubernetes.io/docs/concepts/services-networking/ingress/
   jellyfin:
     # -- Enable ingress record generation for jellyfin

@@ -1,5 +1,4 @@
 {%- for ingress in ingresses %}
-  # -- {{ ingress.name }} ingress parameters
   # ref: http://kubernetes.io/docs/concepts/services-networking/ingress/
   {{ ingress.values_section_name }}:
     # -- Enable ingress record generation for {{ ingress.name }}
