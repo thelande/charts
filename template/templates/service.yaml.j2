@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "[[ chart.chart_name ]].[[ service.component ]].fullname" . }}
+  name: {{ template "[[ chart.chart_name ]].[[ service.component ]].fullname" . }}{% if service.name != service.component %}-[[ service.name ]]{% endif %}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: [[ service.component ]]
