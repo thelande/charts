@@ -16,6 +16,9 @@ components:
     ports:
       - name: http
         port: 8096
+    env:
+      - name: TZ
+        value: America/Los_Angeles
 
 services:
   - name: jellyfin

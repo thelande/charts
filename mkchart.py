@@ -60,6 +60,11 @@ class ComponentType(str, Enum):
 
 class BasePortBlock(NamedBlock):
     port: int
+    protocol: str = "TCP"
+
+
+class EnvBlock(NamedBlock):
+    value: str
 
 
 class ComponentBlock(NamedBlock):
@@ -68,6 +73,7 @@ class ComponentBlock(NamedBlock):
     image: ImageBlock
     type: ComponentType
     ports: list[BasePortBlock]
+    env: Annotated[list[EnvBlock], Field(default_factory=list)]
     persistence: bool | None = None
 
     @model_validator(mode="after")
@@ -80,7 +86,6 @@ class ComponentBlock(NamedBlock):
 
 class ServicePortBlock(BasePortBlock):
     target_port: int | None = None
-    protocol: str = "TCP"
     node_port: int | None = None
 
 

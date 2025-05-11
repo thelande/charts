@@ -96,6 +96,10 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].args "context" $) | nindent 12 }}
           {{- end }}
           env:
+            {%- for entry in component.env %}
+            - name: [[ entry.name ]]
+              value: "[[ entry.value ]]"
+            {%- endfor %}
             {{- if .Values.[[ component.values_section_name ]].extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
