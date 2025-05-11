@@ -1,0 +1,25 @@
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+annotations:
+  category: Media
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 10.10.7
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: The Free Software Media System - Server Backend & API.
+home: https://jellyfin.org/
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellyfin.png
+maintainers:
+  - name: Thomas Helander
+    url: https://github.com/thelande/charts
+name: jellyfin
+sources:
+  - https://github.com/thelande/charts/tree/main/charts/jellyfin
+  - https://github.com/jellyfin/jellyfin
+version: 0.1.0

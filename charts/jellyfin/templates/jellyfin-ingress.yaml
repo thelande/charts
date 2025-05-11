@@ -1,0 +1,54 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.ingress.jellyfin.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "jellyfin.jellyfin.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: jellyfin
+  {{- if or .Values.ingress.jellyfin.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.ingress.jellyfin.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.jellyfin.ingressClassName | quote }}
+  rules:
+    {{- if .Values.ingress.jellyfin.hostname }}
+    - host: {{ .Values.ingress.jellyfin.hostname }}
+      http:
+        paths:
+          {{- if .Values.ingress.jellyfin.extraPaths }}
+          {{- toYaml .Values.ingress.jellyfin.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.ingress.jellyfin.path }}
+            pathType: {{ .Values.ingress.jellyfin.pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "jellyfin.jellyfin.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.ingress.jellyfin.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "jellyfin.jellyfin.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.ingress.jellyfin.extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.jellyfin.extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.ingress.jellyfin.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.jellyfin.annotations )) .Values.ingress.jellyfin.selfSigned)) .Values.ingress.jellyfin.extraTls }}
+  tls:
+    {{- if and .Values.ingress.jellyfin.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.jellyfin.annotations )) .Values.ingress.jellyfin.selfSigned) }}
+    - hosts:
+        - {{ .Values.ingress.jellyfin.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.ingress.jellyfin.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.jellyfin.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.jellyfin.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
