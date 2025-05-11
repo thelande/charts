@@ -16,7 +16,7 @@ description: The Free Software Media System - Server Backend & API.
 home: https://jellyfin.org/
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellyfin.png
 maintainers:
-  - name: Thomas Helander
+  - name: Tom Helander
     url: https://github.com/thelande/charts
 name: jellyfin
 sources:
