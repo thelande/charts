@@ -74,6 +74,8 @@ class ComponentBlock(NamedBlock):
     type: ComponentType
     ports: list[BasePortBlock]
     env: Annotated[list[EnvBlock], Field(default_factory=list)]
+    envFromCM: str | None = None
+    envFromSecret: str | None = None
     persistence: bool | None = None
 
     @model_validator(mode="after")

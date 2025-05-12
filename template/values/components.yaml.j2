@@ -213,9 +213,9 @@
   ##
 
   # -- Name of existing ConfigMap containing extra env vars for {{ component.values_section_name }} containers
-  extraEnvVarsCM: ""
+  extraEnvVarsCM: "{{ component.envFromCM | default("", true) }}"
   # -- Name of existing Secret containing extra env vars for {{ component.values_section_name }} containers
-  extraEnvVarsSecret: ""
+  extraEnvVarsSecret: "{{ component.envFromSecret | default("", true) }}"
   # -- Optionally specify extra list of additional volumes for the {{ component.values_section_name }} pods
   extraVolumes: []
   # -- Optionally specify extra list of additional volumeMounts for the {{ component.values_section_name }} containers
