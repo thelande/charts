@@ -158,6 +158,12 @@ spec:
       volumes:
         - name: empty-dir
           emptyDir: {}
+        {{- if not .Values.[[ component.values_section_name ]].persistence.enabled }}
+        {%- for pvc in pvcs %}
+        - name: [[ pvc.name ]]
+          emptyDir: {}
+        {%- endfor %}
+        {{- end }}
         {{- if .Values.[[ component.values_section_name ]].extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].extraVolumes "context" $) | nindent 8 }}
         {{- end }}
