@@ -214,6 +214,7 @@ class ChartDefinition(BaseModel):
     def _render_services(self, env: Environment):
         """Render the service helm templates."""
         component_names = self.get_component_names()
+        service_count = len(self.services)
         for service in self.services:
             # Verify the service matches a component.
             if service.component not in component_names:
@@ -222,7 +223,9 @@ class ChartDefinition(BaseModel):
                 )
 
             log.info(f"Rendering Service: {service.name}")
-            service_filename = f"{service.name}-service.yaml"
+            service_filename = "service.yaml"
+            if service_count > 1:
+                service_filename = f"{service.name}-service.yaml"
             context = {"chart": self, "service": service}
             self._render_template(
                 "service.yaml.j2", Path("templates") / service_filename, env, context
@@ -231,6 +234,7 @@ class ChartDefinition(BaseModel):
     def _render_ingresses(self, env: Environment):
         """Render the ingress helm templates."""
         service_names = self.get_service_names()
+        ingress_count = len(self.ingresses)
         for ingress in self.ingresses:
             # Verify the ingress matches a service.
             if ingress.service not in service_names:
@@ -239,7 +243,9 @@ class ChartDefinition(BaseModel):
                 )
 
             log.info(f"Rendering Ingress: {ingress.name}")
-            ingress_filename = f"{ingress.name}-ingress.yaml"
+            ingress_filename = "ingress.yaml"
+            if ingress_count > 1:
+                ingress_filename = f"{ingress.name}-ingress.yaml"
             context = {"chart": self, "ingress": ingress}
             self._render_template(
                 "ingress.yaml.j2", Path("templates") / ingress_filename, env, context
@@ -248,6 +254,7 @@ class ChartDefinition(BaseModel):
     def _render_pvcs(self, env: Environment):
         """Render the PersistentVolumeClaim helm templates."""
         component_names = self.get_component_names()
+        pvc_count = len(self.persistence)
         for pvc in self.persistence:
             # Verify the PVC matches a component.
             if pvc.component not in component_names:
@@ -259,7 +266,9 @@ class ChartDefinition(BaseModel):
             component = self.get_component_by_name(pvc.component)
             if component.type != ComponentType.STATEFULSET:
                 log.info(f"Rendering PVC: {pvc.name}")
-                pvc_filename = f"{pvc.name}-pvc.yaml"
+                pvc_filename = "pvc.yaml"
+                if pvc_count > 1:
+                    pvc_filename = f"{pvc.name}-pvc.yaml"
                 context = {"chart": self, "pvc": pvc}
                 self._render_template(
                     "pvc.yaml.j2", Path("templates") / pvc_filename, env, context
@@ -277,14 +286,17 @@ class ChartDefinition(BaseModel):
         statefulsets = [
             c for c in self.components if c.type == ComponentType.STATEFULSET
         ]
+        sts_count = len(statefulsets)
         for sts in statefulsets:
             log.info(f"Rendering StatefulSet: {sts.name}")
-            deployment_filename = f"{sts.name}-statefulset.yaml"
+            sts_filename = "statefulset.yaml"
+            if sts_count > 1:
+                sts_filename = f"{sts.name}-statefulset.yaml"
             pvcs = self.get_pvcs_for_component(sts.name)
             context = {"chart": self, "component": sts, "pvcs": pvcs}
             self._render_template(
                 "statefulset.yaml.j2",
-                Path("templates") / deployment_filename,
+                Path("templates") / sts_filename,
                 env,
                 context,
             )
@@ -292,9 +304,12 @@ class ChartDefinition(BaseModel):
     def _render_deployments(self, env: Environment):
         """Render the deployment helm templates."""
         deployments = [c for c in self.components if c.type == ComponentType.DEPLOYMENT]
+        deployment_count = len(deployments)
         for deployment in deployments:
             log.info(f"Rendering Deployment: {deployment.name}")
-            deployment_filename = f"{deployment.name}-deployment.yaml"
+            deployment_filename = "deployment.yaml"
+            if deployment_count > 1:
+                deployment_filename = f"{deployment.name}-deployment.yaml"
             pvcs = self.get_pvcs_for_component(deployment.name)
             context = {"chart": self, "component": deployment, "pvcs": pvcs}
             self._render_template(
