@@ -157,6 +157,13 @@ metrics:
     ##
 {% endif %}
 
+{%- for secret in secrets %}
+{{ secret.values_section_name }}Secret:
+  {%- for key in secret.secret_keys %}
+  {{ key.values_section_name }}: ""
+  {%- endfor %}
+  existingSecret: ""
+{% endfor %}
 {%- for chart in subcharts %}
 {{ chart.name }}:
   enabled: false

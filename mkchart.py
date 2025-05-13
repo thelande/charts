@@ -144,6 +144,11 @@ class PersistenceBlock(NamedBlock):
             self.component = self.name
 
 
+class SecretBlock(NamedBlock):
+    secret_keys: list[NamedBlock]
+    component: str
+
+
 class ChartDefinition(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -166,6 +171,7 @@ class ChartDefinition(BaseModel):
     services: Annotated[list[ServiceBlock], Field(default_factory=list)]
     ingresses: Annotated[list[IngressBlock], Field(default_factory=list)]
     persistence: Annotated[list[PersistenceBlock], Field(default_factory=list)]
+    secrets: Annotated[list[SecretBlock], Field(default_factory=list)]
 
     @classmethod
     def from_file(cls, config_file: typer.FileText):
@@ -230,6 +236,7 @@ class ChartDefinition(BaseModel):
         )
 
         self._render_components(helm_tmpl_env)
+        self._render_secrets(helm_tmpl_env)
         self._render_services(helm_tmpl_env)
         self._render_ingresses(helm_tmpl_env)
         self._render_pvcs(helm_tmpl_env)
@@ -252,6 +259,26 @@ class ChartDefinition(BaseModel):
             context = {"chart": self, "service": service}
             self._render_template(
                 "service.yaml.j2", Path("templates") / service_filename, env, context
+            )
+
+    def _render_secrets(self, env: Environment):
+        """Render the secret helm templates."""
+        component_names = self.get_component_names()
+        secret_count = len(self.secrets)
+        for secret in self.secrets:
+            # Verify the service matches a component.
+            if secret.component not in component_names:
+                raise ValueError(
+                    f"Secret is not associated with a known component: {secret.name}"
+                )
+
+            log.info(f"Rendering Secret: {secret.name}")
+            secret_filename = "secret.yaml"
+            if secret_count > 1:
+                secret_filename = f"{secret.name}-secret.yaml"
+            context = {"chart": self, "secret": secret}
+            self._render_template(
+                "secret.yaml.j2", Path("templates") / secret_filename, env, context
             )
 
     def _render_ingresses(self, env: Environment):
