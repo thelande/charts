@@ -96,7 +96,11 @@ spec:
           env:
             {%- for entry in component.env %}
             - name: [[ entry.name ]]
+              {%- if entry.value is not none %}
               value: "[[ entry.value ]]"
+              {%- else %}
+              valueFrom: [[ entry.valueFrom | tojson ]]
+              {%- endif %}
             {%- endfor %}
             {{- if .Values.[[ component.values_section_name ]].extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].extraEnvVars "context" $) | nindent 12 }}
@@ -156,8 +160,12 @@ spec:
       volumes:
       {%- for pvc in pvcs %}
         - name: [[ pvc.name ]]
+          {{- if .Values.persistence.[[ pvc.values_section_name ]].enabled }}
           persistentVolumeClaim:
             claimName: {{ template "[[ chart.chart_name ]].[[ pvc.component ]].fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
       {%- endfor %}
         - name: empty-dir
           emptyDir: {}

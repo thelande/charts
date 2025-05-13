@@ -64,7 +64,17 @@ class BasePortBlock(NamedBlock):
 
 
 class EnvBlock(NamedBlock):
-    value: str
+    value: str | None = None
+    value_from: dict[str, Any] | None = None
+    
+    @model_validator(mode="after")
+    def validate_value(self) -> Self:
+        if self.value is None and self.value_from is None:
+            raise ValidationError("Either value or value_from must be set.")
+        return self
+    
+    def valuefrom_to_yaml(self):
+        return yaml.dump(self.value_from)
 
 
 class ProbeHttpGet(BaseModel):

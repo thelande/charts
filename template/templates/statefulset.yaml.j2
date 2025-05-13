@@ -98,7 +98,12 @@ spec:
           env:
             {%- for entry in component.env %}
             - name: [[ entry.name ]]
+              {%- if entry.value is not none %}
               value: "[[ entry.value ]]"
+              {%- else %}
+              valueFrom:
+                [[ entry.valuefrom_to_yaml() | indent(16) ]]
+              {%- endif %}
             {%- endfor %}
             {{- if .Values.[[ component.values_section_name ]].extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].extraEnvVars "context" $) | nindent 12 }}
