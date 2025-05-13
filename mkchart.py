@@ -81,7 +81,7 @@ class ProbeBlock(BaseModel):
     success_threshold: int = 1
 
     # Probe definitions
-    http_probe: ProbeHttpGet | None = None
+    http_probe: ProbeHttpGet = ProbeHttpGet()
 
 
 class ComponentBlock(NamedBlock):
