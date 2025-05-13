@@ -321,7 +321,7 @@ class ChartDefinition(BaseModel):
                 raise ValueError(
                     f"PVC is not associated with a known component: {pvc.name}"
                 )
-            
+
             # Do not render the PVC if it belongs to a StatefulSet.
             component = self.get_component_by_name(pvc.component)
             if component.type != ComponentType.STATEFULSET:
@@ -409,7 +409,7 @@ class ChartDefinition(BaseModel):
         Returns the list of component names.
         """
         return [c.name for c in self.components]
-    
+
     def get_component_by_name(self, name: str) -> ComponentBlock:
         """
         Returns the named component, or raises a `ValueError` if no component
@@ -423,7 +423,7 @@ class ChartDefinition(BaseModel):
             if component.name == name:
                 return component
         raise ValueError(f"No component exists with name: {name}")
-    
+
     def get_pvcs_for_component(self, name: str) -> list[PersistenceBlock]:
         """
         Returns a list of persistent blocks for the named component.
