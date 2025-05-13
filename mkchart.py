@@ -67,6 +67,23 @@ class EnvBlock(NamedBlock):
     value: str
 
 
+class ProbeHttpGet(BaseModel):
+    path: str = "/"
+    port: str | int = "http"
+
+
+class ProbeBlock(BaseModel):
+    enabled: bool = True
+    initial_delay_seconds: int = 0
+    period_seconds: int = 10
+    timeout_seconds: int = 1
+    failure_threshold: int = 3
+    success_threshold: int = 1
+
+    # Probe definitions
+    http_probe: ProbeHttpGet | None = None
+
+
 class ComponentBlock(NamedBlock):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -77,6 +94,12 @@ class ComponentBlock(NamedBlock):
     envFromCM: str | None = None
     envFromSecret: str | None = None
     persistence: bool | None = None
+
+    liveness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
+    readiness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
+    startup_probe: Annotated[
+        ProbeBlock, Field(default_factory=lambda: ProbeBlock(enabled=False))
+    ]
 
     @model_validator(mode="after")
     def check_persistence(self) -> Self:
