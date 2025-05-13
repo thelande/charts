@@ -117,7 +117,7 @@ spec:
           {{- else if ne .Values.[[ component.values_section_name ]].resourcesPreset "none" }}
           resources: {{- include "common.resources.preset" (dict "type" .Values.[[ component.values_section_name ]].resourcesPreset) | nindent 12 }}
           {{- end }}
-          {{- with .Values.[[ component.values_section_name ]].extraContainerPorts }}
+          {{- with .Values.[[ component.values_section_name ]].containerPorts }}
           ports:
             {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
           {{- end }}
