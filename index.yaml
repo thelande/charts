@@ -22,6 +22,38 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/apcupsd-exporter-0.1.0/apcupsd-exporter-0.1.0.tgz
     version: 0.1.0
+  bar-assistant:
+  - annotations:
+      category: Recipe Creation
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 5.3.0
+    created: "2025-05-14T04:14:20.745719994Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.13.x
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Bar assistant is a self hosted application for managing your home
+      bar.
+    digest: c1d77ac4d13e654d6380852e63672b37bbf63df58e299f52f1d2a2bfcb143288
+    home: https://bar-assistant.app
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/bar-assistant.png
+    maintainers:
+    - name: Tom Helander
+      url: https://github.com/thelande/charts
+    name: bar-assistant
+    sources:
+    - https://github.com/thelande/charts/tree/main/charts/bar-assistant
+    - https://github.com/karlomikus/bar-assistant
+    urls:
+    - https://github.com/thelande/charts/releases/download/bar-assistant-0.1.0/bar-assistant-0.1.0.tgz
+    version: 0.1.0
   code:
   - apiVersion: v2
     appVersion: 24.04.13.2.1
@@ -787,4 +819,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-11T00:46:59.215700633Z"
+generated: "2025-05-14T04:14:20.876977134Z"
