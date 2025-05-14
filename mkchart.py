@@ -134,11 +134,27 @@ class ServiceBlock(NamedBlock):
             self.component = self.name
 
 
-class IngressBlock(NamedBlock):
-    service: str | None = None  # Defaults to the ingress' `name` in model_post_init
+class IngressPathMixin(BaseModel):
+    service: str | None = None
     service_port_name: str = "http"
 
+
+class PathBlock(BaseModel):
+    path: str
+    path_type: str = "ImplementationSpecific"
+    backend: IngressPathMixin
+
+
+class IngressBlock(NamedBlock, IngressPathMixin):
+    path: str = "/"
+    path_type: str = "ImplementationSpecific"
+    annotations: Annotated[dict[str, str], Field(default_factory=dict)]
+    extra_paths: Annotated[list[PathBlock], Field(default_factory=list)]
+
     def model_post_init(self, context: Any) -> None:
+        """
+        Use the ingress name as the default name for the service if none is provided.
+        """
         super().model_post_init(context)
         if not self.service:
             self.service = self.name
