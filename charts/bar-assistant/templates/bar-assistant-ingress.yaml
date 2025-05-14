@@ -1,0 +1,54 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.ingress.barAssistant.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "bar-assistant.bar-assistant.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: bar-assistant
+  {{- if or .Values.ingress.barAssistant.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.ingress.barAssistant.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.barAssistant.ingressClassName | quote }}
+  rules:
+    {{- if .Values.ingress.barAssistant.hostname }}
+    - host: {{ .Values.ingress.barAssistant.hostname }}
+      http:
+        paths:
+          {{- if .Values.ingress.barAssistant.extraPaths }}
+          {{- toYaml .Values.ingress.barAssistant.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.ingress.barAssistant.path }}
+            pathType: {{ .Values.ingress.barAssistant.pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.bar-assistant.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.ingress.barAssistant.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.bar-assistant.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.ingress.barAssistant.extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.barAssistant.extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.ingress.barAssistant.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.barAssistant.annotations )) .Values.ingress.barAssistant.selfSigned)) .Values.ingress.barAssistant.extraTls }}
+  tls:
+    {{- if and .Values.ingress.barAssistant.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.barAssistant.annotations )) .Values.ingress.barAssistant.selfSigned) }}
+    - hosts:
+        - {{ .Values.ingress.barAssistant.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.ingress.barAssistant.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.barAssistant.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.barAssistant.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

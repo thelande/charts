@@ -1,0 +1,225 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "bar-assistant.bar-assistant.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: bar-assistant
+  {{- if or .Values.barAssistant.statefulsetAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.barAssistant.statefulsetAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.barAssistant.replicaCount }}
+  podManagementPolicy: {{ .Values.podManagementPolicy | quote }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.barAssistant.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: bar-assistant
+  serviceName: {{ template "common.names.fullname" . }}
+  {{- if .Values.barAssistant.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.barAssistant.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- if .Values.barAssistant.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: bar-assistant
+    spec:
+      {{- include "bar-assistant.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "bar-assistant.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.barAssistant.automountServiceAccountToken }}
+      {{- if .Values.barAssistant.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.barAssistant.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.barAssistant.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.barAssistant.podAffinityPreset "component" "bar-assistant" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.barAssistant.podAntiAffinityPreset "component" "bar-assistant" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.barAssistant.nodeAffinityPreset.type "key" .Values.barAssistant.nodeAffinityPreset.key "values" .Values.barAssistant.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.barAssistant.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.barAssistant.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.barAssistant.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.barAssistant.priorityClassName }}
+      priorityClassName: {{ .Values.barAssistant.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.barAssistant.schedulerName }}
+      schedulerName: {{ .Values.barAssistant.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.barAssistant.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.barAssistant.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.barAssistant.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.barAssistant.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.barAssistant.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- with .Values.barAssistant.initContainers }}
+      initContainers:
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: bar-assistant
+          image: {{ template "bar-assistant.bar-assistant.image" . }}
+          imagePullPolicy: {{ .Values.barAssistant.image.pullPolicy }}
+          {{- if .Values.barAssistant.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.barAssistant.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.barAssistant.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.barAssistant.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: APP_URL
+              value: "{{ required "baseUrl must be set" .Values.baseUrl }}/bar"
+            - name: MEILISEARCH_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: MEILI_MASTER_KEY
+                  name: meili-master-key
+
+            - name: MEILISEARCH_HOST
+              value: "http://{{ template "bar-assistant.meili.fullname" . }}.{{ include "common.names.namespace" . }}.svc.cluster.local:7700"
+            - name: CACHE_DRIVER
+              value: "file"
+            - name: SESSION_DRIVER
+              value: "file"
+            - name: ALLOW_REGISTRATION
+              value: "true"
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: clientID
+                  name: '{{- template "common.names.fullname" . }}-oauth'
+
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: clientSecret
+                  name: '{{- template "common.names.fullname" . }}-oauth'
+
+            - name: KEYCLOAK_REDIRECT_URI
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIRECT_URI
+                  name: '{{- template "common.names.fullname" . }}-oauth'
+
+            - name: KEYCLOAK_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: BASE_URL
+                  name: '{{- template "common.names.fullname" . }}-oauth'
+
+            - name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  key: REALM
+                  name: '{{- template "common.names.fullname" . }}-oauth'
+
+            {{- if .Values.barAssistant.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.barAssistant.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.barAssistant.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.barAssistant.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.barAssistant.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.barAssistant.resources }}
+          resources: {{- toYaml .Values.barAssistant.resources | nindent 12 }}
+          {{- else if ne .Values.barAssistant.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.barAssistant.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.barAssistant.containerPorts }}
+          ports:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.barAssistant.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.barAssistant.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.barAssistant.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.barAssistant.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.barAssistant.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.barAssistant.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.barAssistant.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.barAssistant.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.barAssistant.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.barAssistant.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: bar-data
+              mountPath: /var/www/cocktails/storage/bar-assistant
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+          {{- if .Values.barAssistant.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.barAssistant.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.barAssistant.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        {{- if not .Values.barAssistant.persistence.enabled }}
+        - name: bar-data
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.barAssistant.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.barAssistant.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+  {{- if .Values.barAssistant.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: bar-data
+        {{- if or .Values.persistence.barAssistant.annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.barAssistant.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.barAssistant.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.barAssistant.size | quote }}
+        {{- if .Values.persistence.barAssistant.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.barAssistant.selector "context" $) | nindent 10 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence.barAssistant "global" .Values.global) | nindent 8 }}
+  {{- end }}

@@ -1,0 +1,177 @@
+chart_name: bar-assistant
+app_version: 5.3.0
+description: Bar assistant is a self hosted application for managing your home bar.
+category: Recipe Creation
+homepage: https://bar-assistant.app
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/bar-assistant.png
+app_source: https://github.com/karlomikus/bar-assistant
+subcharts:
+  - name: redis
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 20.13.x
+
+smtp: true
+oauth: true
+
+components:
+  - name: bar-assistant
+    values_section_name: barAssistant
+    type: statefulset
+    persistence: true
+    image:
+      repository: barassistant/server
+      tag: '5.3.0'
+    ports:
+      - name: http
+        port: 8080
+    env:
+      - name: APP_URL
+        value: '{{ required "baseUrl must be set" .Values.baseUrl }}/bar'
+      - name: MEILISEARCH_KEY
+        value_from:
+          secretKeyRef:
+            name: meili-master-key
+            key: MEILI_MASTER_KEY
+      - name: MEILISEARCH_HOST
+        value: 'http://{{ template "bar-assistant.meili.fullname" . }}.{{ include "common.names.namespace" . }}.svc.cluster.local:7700'
+#      - name: REDIS_HOST
+#        value: '{{- if .Values.redis.enabled }}redis{{- end }}'
+#      - name: CACHE_DRIVER
+#        value: '{{- if .Values.redis.enabled }}redis{{ else }}file{{- end }}'
+#      - name: SESSION_DRIVER
+#        value: '{{- if .Values.redis.enabled }}redis{{ else }}file{{- end }}'
+      - name: CACHE_DRIVER
+        value: file
+      - name: SESSION_DRIVER
+        value: file
+      - name: ALLOW_REGISTRATION
+        value: "true"
+      - name: KEYCLOAK_CLIENT_ID
+        value_from:
+          secretKeyRef:
+            name: '{{- template "common.names.fullname" . }}-oauth'
+            key: clientID
+      - name: KEYCLOAK_CLIENT_SECRET
+        value_from:
+          secretKeyRef:
+            name: '{{- template "common.names.fullname" . }}-oauth'
+            key: clientSecret
+      - name: KEYCLOAK_REDIRECT_URI
+        value_from:
+          configMapKeyRef:
+            name: '{{- template "common.names.fullname" . }}-oauth'
+            key: REDIRECT_URI
+      - name: KEYCLOAK_BASE_URL
+        value_from:
+          configMapKeyRef:
+            name: '{{- template "common.names.fullname" . }}-oauth'
+            key: BASE_URL
+      - name: KEYCLOAK_REALM
+        value_from:
+          configMapKeyRef:
+            name: '{{- template "common.names.fullname" . }}-oauth'
+            key: REALM
+    readiness_probe:
+      initial_delay_seconds: 60
+      http_probe:
+        path: /docs
+        port: http
+    liveness_probe:
+      initial_delay_seconds: 60
+      http_probe:
+        path: /docs
+        port: http
+
+  - name: meili
+    type: deployment
+    image:
+      repository: getmeili/meilisearch
+      tag: 'v1.14'
+    ports:
+      - name: http
+        port: 7700
+    env:
+      - name: MEILI_NO_ANALYTICS
+        value: "true"
+      - name: MEILI_ENV
+        value: production
+    envFromSecret: meili-master-key
+
+  - name: salt-rim
+    values_section_name: saltRim
+    type: deployment
+    image:
+      repository: barassistant/salt-rim
+      tag: 'v4'
+    ports:
+      - name: http
+        port: 8080
+    env:
+      - name: API_URL
+        value: '{{ .Values.baseUrl }}/bar'
+      - name: MEILISEARCH_URL
+        value: '{{ .Values.baseUrl }}/search'
+
+services:
+  - name: bar-assistant
+    values_section_name: barAssistant
+    ports:
+      - name: http
+        port: 8080
+  - name: meili
+    ports:
+      - name: http
+        port: 7700
+  - name: salt-rim
+    values_section_name: saltRim
+    ports:
+      - name: http
+        port: 8080
+
+ingresses:
+  - name: salt-rim
+    values_section_name: saltRim
+    path_type: Prefix
+
+  - name: bar-assistant
+    values_section_name: barAssistant
+    path: /bar(/|$)(.*)
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    extra_paths:
+      - path: /search(/|$)(.*)
+        backend:
+          service: bar-assistant-meili
+
+persistence:
+  - name: meilisearch-data
+    component: meili
+    values_section_name: meili
+    mount_path: /meili_data
+  - name: bar-data
+    component: bar-assistant
+    values_section_name: barAssistant
+    mount_path: /var/www/cocktails/storage/bar-assistant
+
+secrets:
+  - name: meili-master-key
+    values_section_name: meiliMasterKey
+    component: meili
+    secret_keys:
+      - name: MEILI_MASTER_KEY
+        values_section_name: value
+
+disabled_templates:
+  - clusterrolebinding
+  - configmap
+  - daemonset
+  - extra-list
+  - hpa
+  - networkpolicy
+  - pdb
+  - role
+  - servicemonitor
+  - statefulset
+  - tls-secret
+  - vpa

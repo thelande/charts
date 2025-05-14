@@ -1,0 +1,29 @@
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+annotations:
+  category: Recipe Creation
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 5.3.0
+dependencies:
+  - condition: redis.enabled
+    name: redis
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 20.13.x
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: Bar assistant is a self hosted application for managing your home bar.
+home: https://bar-assistant.app
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/bar-assistant.png
+maintainers:
+  - name: Tom Helander
+    url: https://github.com/thelande/charts
+name: bar-assistant
+sources:
+  - https://github.com/thelande/charts/tree/main/charts/bar-assistant
+  - https://github.com/karlomikus/bar-assistant
+version: 0.1.0

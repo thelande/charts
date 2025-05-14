@@ -1,0 +1,57 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "bar-assistant.bar-assistant.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: bar-assistant
+  {{- if or .Values.services.barAssistant.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.services.barAssistant.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{ $type := .Values.services.barAssistant.type }}
+  type: {{ $type }}
+  {{- if and .Values.services.barAssistant.clusterIP (eq $type "ClusterIP") }}
+  clusterIP: {{ .Values.services.barAssistant.clusterIP }}
+  {{- end }}
+  {{- if .Values.services.barAssistant.sessionAffinity }}
+  sessionAffinity: {{ .Values.services.barAssistant.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.services.barAssistant.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.services.barAssistant.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if or (eq $type "LoadBalancer") (eq $type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.services.barAssistant.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq $type "LoadBalancer") (not (empty .Values.services.barAssistant.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.services.barAssistant.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq $type "LoadBalancer") (not (empty .Values.services.barAssistant.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.services.barAssistant.loadBalancerIP }}
+  {{- end }}
+  ports:
+    {{- range .Values.services.barAssistant.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      {{- if .targetPort }}
+      targetPort: {{ .targetPort }}
+      {{- end }}
+      protocol: {{ .protocol }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- else if eq $type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.services.barAssistant.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.services.barAssistant.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.barAssistant.podLabels .Values.commonLabels) "context" .) | fromYaml }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: bar-assistant

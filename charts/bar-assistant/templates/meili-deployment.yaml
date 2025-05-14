@@ -1,0 +1,160 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ template "bar-assistant.meili.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: meili
+  {{- if or .Values.meili.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.meili.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.meili.replicaCount }}
+  {{- if .Values.meili.updateStrategy }}
+  strategy: {{- toYaml .Values.meili.updateStrategy | nindent 4 }}
+  {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.meili.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: meili
+  template:
+    metadata:
+      {{- if .Values.meili.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.meili.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: meili
+    spec:
+      {{- include "bar-assistant.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "bar-assistant.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.meili.automountServiceAccountToken }}
+      {{- if .Values.meili.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.meili.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.meili.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.meili.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.meili.podAffinityPreset "component" "meili" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.meili.podAntiAffinityPreset "component" "meili" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.meili.nodeAffinityPreset.type "key" .Values.meili.nodeAffinityPreset.key "values" .Values.meili.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.meili.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.meili.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.meili.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.meili.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.meili.priorityClassName }}
+      priorityClassName: {{ .Values.meili.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.meili.schedulerName }}
+      schedulerName: {{ .Values.meili.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.meili.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.meili.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.meili.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.meili.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.meili.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.meili.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- with .Values.meili.initContainers }}
+      initContainers:
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: meili
+          image: {{ template "bar-assistant.meili.image" . }}
+          imagePullPolicy: {{ .Values.meili.image.pullPolicy }}
+          {{- if .Values.meili.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.meili.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.meili.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.meili.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.meili.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.meili.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: MEILI_NO_ANALYTICS
+              value: "true"
+            - name: MEILI_ENV
+              value: "production"
+            {{- if .Values.meili.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.meili.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.meili.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.meili.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.meili.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.meili.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.meili.resources }}
+          resources: {{- toYaml .Values.meili.resources | nindent 12 }}
+          {{- else if ne .Values.meili.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.meili.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.meili.containerPorts }}
+          ports:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.meili.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.meili.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.meili.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.meili.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.meili.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.meili.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.meili.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.meili.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.meili.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.meili.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.meili.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.meili.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.meili.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.meili.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: meilisearch-data
+              mountPath: /meili_data
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+          {{- if .Values.meili.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.meili.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.meili.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.meili.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: meilisearch-data
+          {{- if .Values.persistence.meili.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "bar-assistant.meili.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: empty-dir
+          emptyDir: {}
+        {{- if .Values.meili.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.meili.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}

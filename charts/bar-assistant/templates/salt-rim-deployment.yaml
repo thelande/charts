@@ -1,0 +1,151 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ template "bar-assistant.salt-rim.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: salt-rim
+  {{- if or .Values.saltRim.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.saltRim.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.saltRim.replicaCount }}
+  {{- if .Values.saltRim.updateStrategy }}
+  strategy: {{- toYaml .Values.saltRim.updateStrategy | nindent 4 }}
+  {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.saltRim.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: salt-rim
+  template:
+    metadata:
+      {{- if .Values.saltRim.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: salt-rim
+    spec:
+      {{- include "bar-assistant.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "bar-assistant.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.saltRim.automountServiceAccountToken }}
+      {{- if .Values.saltRim.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.saltRim.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.saltRim.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.saltRim.podAffinityPreset "component" "salt-rim" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.saltRim.podAntiAffinityPreset "component" "salt-rim" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.saltRim.nodeAffinityPreset.type "key" .Values.saltRim.nodeAffinityPreset.key "values" .Values.saltRim.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.saltRim.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.saltRim.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.saltRim.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.saltRim.priorityClassName }}
+      priorityClassName: {{ .Values.saltRim.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.saltRim.schedulerName }}
+      schedulerName: {{ .Values.saltRim.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.saltRim.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.saltRim.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.saltRim.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.saltRim.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.saltRim.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- with .Values.saltRim.initContainers }}
+      initContainers:
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: salt-rim
+          image: {{ template "bar-assistant.salt-rim.image" . }}
+          imagePullPolicy: {{ .Values.saltRim.image.pullPolicy }}
+          {{- if .Values.saltRim.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.saltRim.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.saltRim.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.saltRim.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: API_URL
+              value: "{{ .Values.baseUrl }}/bar"
+            - name: MEILISEARCH_URL
+              value: "{{ .Values.baseUrl }}/search"
+            {{- if .Values.saltRim.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.saltRim.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.saltRim.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.saltRim.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.saltRim.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.saltRim.resources }}
+          resources: {{- toYaml .Values.saltRim.resources | nindent 12 }}
+          {{- else if ne .Values.saltRim.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.saltRim.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.saltRim.containerPorts }}
+          ports:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.saltRim.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.saltRim.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.saltRim.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.saltRim.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.saltRim.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.saltRim.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.saltRim.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.saltRim.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.saltRim.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.saltRim.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+          {{- if .Values.saltRim.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.saltRim.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.saltRim.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        {{- if .Values.saltRim.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.saltRim.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}

@@ -1,0 +1,54 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.ingress.saltRim.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "bar-assistant.salt-rim.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: salt-rim
+  {{- if or .Values.ingress.saltRim.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.ingress.saltRim.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.saltRim.ingressClassName | quote }}
+  rules:
+    {{- if .Values.ingress.saltRim.hostname }}
+    - host: {{ .Values.ingress.saltRim.hostname }}
+      http:
+        paths:
+          {{- if .Values.ingress.saltRim.extraPaths }}
+          {{- toYaml .Values.ingress.saltRim.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.ingress.saltRim.path }}
+            pathType: {{ .Values.ingress.saltRim.pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.salt-rim.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.ingress.saltRim.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.salt-rim.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.ingress.saltRim.extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.saltRim.extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.ingress.saltRim.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.saltRim.annotations )) .Values.ingress.saltRim.selfSigned)) .Values.ingress.saltRim.extraTls }}
+  tls:
+    {{- if and .Values.ingress.saltRim.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.saltRim.annotations )) .Values.ingress.saltRim.selfSigned) }}
+    - hosts:
+        - {{ .Values.ingress.saltRim.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.ingress.saltRim.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.saltRim.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.saltRim.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

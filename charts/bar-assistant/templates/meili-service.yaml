@@ -1,0 +1,57 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "bar-assistant.meili.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: meili
+  {{- if or .Values.services.meili.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.services.meili.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{ $type := .Values.services.meili.type }}
+  type: {{ $type }}
+  {{- if and .Values.services.meili.clusterIP (eq $type "ClusterIP") }}
+  clusterIP: {{ .Values.services.meili.clusterIP }}
+  {{- end }}
+  {{- if .Values.services.meili.sessionAffinity }}
+  sessionAffinity: {{ .Values.services.meili.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.services.meili.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.services.meili.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if or (eq $type "LoadBalancer") (eq $type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.services.meili.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq $type "LoadBalancer") (not (empty .Values.services.meili.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.services.meili.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq $type "LoadBalancer") (not (empty .Values.services.meili.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.services.meili.loadBalancerIP }}
+  {{- end }}
+  ports:
+    {{- range .Values.services.meili.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      {{- if .targetPort }}
+      targetPort: {{ .targetPort }}
+      {{- end }}
+      protocol: {{ .protocol }}
+      {{- if .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- else if eq $type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- end }}
+    {{- if .Values.services.meili.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.services.meili.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.meili.podLabels .Values.commonLabels) "context" .) | fromYaml }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: meili

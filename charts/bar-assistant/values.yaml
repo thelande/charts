@@ -1,0 +1,1334 @@
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+global:
+  # -- Global Docker image registry
+  imageRegistry: ""
+  ## e.g:
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  
+  # -- Global Docker registry secret names as an array
+  imagePullSecrets: []
+
+  # -- Global default StorageClass for Persistent Volume(s)
+  defaultStorageClass: ""
+
+  ## Security parameters
+  ##
+  security:
+    # -- Allows skipping image verification
+    allowInsecureImages: false
+
+## Common parameters
+##
+# -- Override Kubernetes version
+kubeVersion: ""
+# -- Override Kubernetes API versions reported by .Capabilities
+apiVersions: []
+# -- String to partially override common.names.name
+nameOverride: ""
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+# -- String to fully override common.names.namespace
+namespaceOverride: ""
+# -- Labels to add to all deployed objects
+commonLabels: {}
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+# -- Kubernetes cluster domain name
+clusterDomain: cluster.local
+
+## Diagnostic mode
+diagnosticMode:
+  # -- Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  enabled: false
+  # -- Command to override all containers in the chart release
+  command:
+    - sleep
+  # -- Args to override all containers in the chart release
+  args:
+    - infinity
+
+barAssistant:
+  image:
+    # -- barAssistant image registry
+    registry: docker.io
+    # -- barAssistant image repository
+    repository: barassistant/server
+    # -- barAssistant image tag
+    tag: 5.3.0
+    # -- The image pull policy
+    # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets
+    # Secrets must be manually created in the namespace.
+    # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    pullSecrets: []
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+  
+  # -- Number of barAssistant replicas to deploy
+  replicaCount: 1
+
+  # -- List of ports for barAssistant containers
+  containerPorts:
+    - name: http
+      containerPort: 8080
+  ## e.g:
+  ## containerPorts:
+  ##   - name: myservice
+  ##     containerPort: 9090
+  ##
+
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  livenessProbe:
+    # -- Enable livenessProbe on barAssistant containers
+    enabled: true
+    # -- Initial delay seconds for livenessProbe
+    initialDelaySeconds: 60
+    # -- Period seconds for livenessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for livenessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for livenessProbe
+    failureThreshold: 3
+    # -- Success threshold for livenessProbe
+    successThreshold: 1
+    httpGet:
+      path: /docs
+      port: http
+
+  readinessProbe:
+    # -- Enable readinessProbe on barAssistant containers
+    enabled: true
+    # -- Initial delay seconds for readinessProbe
+    initialDelaySeconds: 60
+    # -- Period seconds for readinessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for readinessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for readinessProbe
+    failureThreshold: 3
+    # -- Success threshold for readinessProbe
+    successThreshold: 1
+    httpGet:
+      path: /docs
+      port: http
+
+  startupProbe:
+    # -- Enable startupProbe on barAssistant containers
+    enabled: false
+    # -- Initial delay seconds for startupProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for startupProbe
+    periodSeconds: 10
+    # -- Timeout seconds for startupProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for startupProbe
+    failureThreshold: 3
+    # -- Success threshold for startupProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+  
+  # -- Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  # -- Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  # -- Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  ## barAssistant resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  # -- Set barAssistant container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if barAssistant.resources is set (barAssistant.resources is recommended for production).
+  # More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  resourcesPreset: "nano"
+  # -- Set barAssistant container requests and limits for different resources like CPU or memory (essential for production workloads)
+  resources: {}
+  ## e.g:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext:
+    # -- Enable barAssistant pods' Security Context
+    enabled: true
+    # -- Set filesystem group change policy for barAssistant pods
+    fsGroupChangePolicy: Always
+    # -- settings using the sysctl interface for barAssistant pods
+    sysctls: []
+    # -- Set filesystem extra groups for barAssistant pods
+    supplementalGroups: []
+    # -- Set fsGroup in barAssistant pods' Security Context
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext:
+    # -- Enabled barAssistant container' Security Context
+    enabled: true
+    # -- Set SELinux options in barAssistant container
+    seLinuxOptions: {}
+    # -- Set runAsUser in barAssistant container' Security Context
+    runAsUser: 1001
+    runAsGroup: 1001
+    # -- Set runAsNonRoot in barAssistant container' Security Context
+    runAsNonRoot: true
+    # -- Set readOnlyRootFilesystem in barAssistant container' Security Context
+    readOnlyRootFilesystem: true
+    # -- Set privileged in barAssistant container' Security Context
+    privileged: false
+    # -- Set allowPrivilegeEscalation in barAssistant container' Security Context
+    allowPrivilegeEscalation: false
+    # -- List of capabilities to be dropped in barAssistant container
+    capabilities:
+      drop: ["ALL"]
+    # -- Set seccomp profile in barAssistant container
+    seccompProfile:
+      type: "RuntimeDefault"
+    
+  # -- Override default barAssistant container command (useful when using custom images)
+  command: []
+  # -- Override default barAssistant container args (useful when using custom images)
+  args: []
+  # -- Mount Service Account token in barAssistant pods
+  automountServiceAccountToken: false
+  # -- Annotations for barAssistant
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+  # -- barAssistant pods host aliases
+  # ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  hostAliases: []
+
+  # -- Extra labels for barAssistant pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+  # -- Annotations for barAssistant pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # -- Pod affinity preset. Ignored if `barAssistant.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinityPreset: ""
+  # -- Pod anti-affinity preset. Ignored if `barAssistant.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAntiAffinityPreset: soft
+  ## Node barAssistant.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinityPreset:
+    # -- Node affinity preset type. Ignored if `barAssistant.affinity` is set. Allowed values: `soft` or `hard`
+    type: ""
+    # -- Node label key to match. Ignored if `barAssistant.affinity` is set
+    key: ""
+    # -- Node label values to match. Ignored if `barAssistant.affinity` is set
+    values: []
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+  # -- Affinity for barAssistant pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # NOTE: `barAssistant.podAffinityPreset`, `barAssistant.podAntiAffinityPreset`, and `barAssistant.nodeAffinityPreset` will be ignored when it's set
+  affinity: {}
+  # -- Node labels for barAssistant pods assignment
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  nodeSelector: {}
+  # --Tolerations for barAssistant pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+  # -- Statefulset strategy type
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  # -- Pod management policy for barAssistant statefulset
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: OrderedReady
+  # -- Seconds barAssistant pods need to terminate gracefully
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  terminationGracePeriodSeconds: ""
+  # -- Array with extra environment variables to add to barAssistant containers
+  extraEnvVars: []
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+
+  # -- Name of existing ConfigMap containing extra env vars for barAssistant containers
+  extraEnvVarsCM: ""
+  # -- Name of existing Secret containing extra env vars for barAssistant containers
+  extraEnvVarsSecret: ""
+  # -- Optionally specify extra list of additional volumes for the barAssistant pods
+  extraVolumes: []
+  # -- Optionally specify extra list of additional volumeMounts for the barAssistant containers
+  extraVolumeMounts: []
+  # -- Add additional sidecar containers to the barAssistant pods
+  sidecars: []
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+
+  # -- Add additional init containers to the barAssistant pods
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  persistence:
+    # -- Enable persistence using Persistent Volume Claims
+    enabled: false
+
+  # -- 'volumePermissions' init container parameters
+  # Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+  # based on the *podSecurityContext/*containerSecurityContext parameters
+  volumePermissions:
+    # -- Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+    enabled: false
+    ## OS Shell + Utility image
+    ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+    ## @param volumePermissions.image.registry [default: REGISTRY_NAME] OS Shell + Utility image registry
+    ## @param volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] OS Shell + Utility image repository
+    ## @skip volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+    ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+    ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/os-shell
+      tag: 12-debian-12-r43
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## Init container's resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## Example:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+    ## Init container Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param volumePermissions.containerSecurityContext.enabled Enabled init container' Security Context
+    ## @param volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in init container
+    ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+    ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+    ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+    ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+    ##
+    containerSecurityContext:
+      enabled: true
+      seLinuxOptions: {}
+      runAsUser: 0
+
+meili:
+  image:
+    # -- meili image registry
+    registry: docker.io
+    # -- meili image repository
+    repository: getmeili/meilisearch
+    # -- meili image tag
+    tag: v1.14
+    # -- The image pull policy
+    # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets
+    # Secrets must be manually created in the namespace.
+    # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    pullSecrets: []
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+  
+  # -- Number of meili replicas to deploy
+  replicaCount: 1
+
+  # -- List of ports for meili containers
+  containerPorts:
+    - name: http
+      containerPort: 7700
+  ## e.g:
+  ## containerPorts:
+  ##   - name: myservice
+  ##     containerPort: 9090
+  ##
+
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  livenessProbe:
+    # -- Enable livenessProbe on meili containers
+    enabled: true
+    # -- Initial delay seconds for livenessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for livenessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for livenessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for livenessProbe
+    failureThreshold: 3
+    # -- Success threshold for livenessProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    # -- Enable readinessProbe on meili containers
+    enabled: true
+    # -- Initial delay seconds for readinessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for readinessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for readinessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for readinessProbe
+    failureThreshold: 3
+    # -- Success threshold for readinessProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    # -- Enable startupProbe on meili containers
+    enabled: false
+    # -- Initial delay seconds for startupProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for startupProbe
+    periodSeconds: 10
+    # -- Timeout seconds for startupProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for startupProbe
+    failureThreshold: 3
+    # -- Success threshold for startupProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+  
+  # -- Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  # -- Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  # -- Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  ## meili resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  # -- Set meili container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if meili.resources is set (meili.resources is recommended for production).
+  # More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  resourcesPreset: "nano"
+  # -- Set meili container requests and limits for different resources like CPU or memory (essential for production workloads)
+  resources: {}
+  ## e.g:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext:
+    # -- Enable meili pods' Security Context
+    enabled: true
+    # -- Set filesystem group change policy for meili pods
+    fsGroupChangePolicy: Always
+    # -- settings using the sysctl interface for meili pods
+    sysctls: []
+    # -- Set filesystem extra groups for meili pods
+    supplementalGroups: []
+    # -- Set fsGroup in meili pods' Security Context
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext:
+    # -- Enabled meili container' Security Context
+    enabled: true
+    # -- Set SELinux options in meili container
+    seLinuxOptions: {}
+    # -- Set runAsUser in meili container' Security Context
+    runAsUser: 1001
+    runAsGroup: 1001
+    # -- Set runAsNonRoot in meili container' Security Context
+    runAsNonRoot: true
+    # -- Set readOnlyRootFilesystem in meili container' Security Context
+    readOnlyRootFilesystem: true
+    # -- Set privileged in meili container' Security Context
+    privileged: false
+    # -- Set allowPrivilegeEscalation in meili container' Security Context
+    allowPrivilegeEscalation: false
+    # -- List of capabilities to be dropped in meili container
+    capabilities:
+      drop: ["ALL"]
+    # -- Set seccomp profile in meili container
+    seccompProfile:
+      type: "RuntimeDefault"
+    
+  # -- Override default meili container command (useful when using custom images)
+  command: []
+  # -- Override default meili container args (useful when using custom images)
+  args: []
+  # -- Mount Service Account token in meili pods
+  automountServiceAccountToken: false
+  # -- Annotations for meili
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+  # -- meili pods host aliases
+  # ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  hostAliases: []
+
+  # -- Extra labels for meili pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+  # -- Annotations for meili pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # -- Pod affinity preset. Ignored if `meili.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinityPreset: ""
+  # -- Pod anti-affinity preset. Ignored if `meili.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAntiAffinityPreset: soft
+  ## Node meili.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinityPreset:
+    # -- Node affinity preset type. Ignored if `meili.affinity` is set. Allowed values: `soft` or `hard`
+    type: ""
+    # -- Node label key to match. Ignored if `meili.affinity` is set
+    key: ""
+    # -- Node label values to match. Ignored if `meili.affinity` is set
+    values: []
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+  # -- Affinity for meili pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # NOTE: `meili.podAffinityPreset`, `meili.podAntiAffinityPreset`, and `meili.nodeAffinityPreset` will be ignored when it's set
+  affinity: {}
+  # -- Node labels for meili pods assignment
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  nodeSelector: {}
+  # --Tolerations for meili pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+  # -- Deployment strategy type
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  # -- Seconds meili pods need to terminate gracefully
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  terminationGracePeriodSeconds: ""
+  # -- Array with extra environment variables to add to meili containers
+  extraEnvVars: []
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+
+  # -- Name of existing ConfigMap containing extra env vars for meili containers
+  extraEnvVarsCM: ""
+  # -- Name of existing Secret containing extra env vars for meili containers
+  extraEnvVarsSecret: "meili-master-key"
+  # -- Optionally specify extra list of additional volumes for the meili pods
+  extraVolumes: []
+  # -- Optionally specify extra list of additional volumeMounts for the meili containers
+  extraVolumeMounts: []
+  # -- Add additional sidecar containers to the meili pods
+  sidecars: []
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+
+  # -- Add additional init containers to the meili pods
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+
+saltRim:
+  image:
+    # -- saltRim image registry
+    registry: docker.io
+    # -- saltRim image repository
+    repository: barassistant/salt-rim
+    # -- saltRim image tag
+    tag: v4
+    # -- The image pull policy
+    # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets
+    # Secrets must be manually created in the namespace.
+    # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    pullSecrets: []
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+  
+  # -- Number of saltRim replicas to deploy
+  replicaCount: 1
+
+  # -- List of ports for saltRim containers
+  containerPorts:
+    - name: http
+      containerPort: 8080
+  ## e.g:
+  ## containerPorts:
+  ##   - name: myservice
+  ##     containerPort: 9090
+  ##
+
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  livenessProbe:
+    # -- Enable livenessProbe on saltRim containers
+    enabled: true
+    # -- Initial delay seconds for livenessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for livenessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for livenessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for livenessProbe
+    failureThreshold: 3
+    # -- Success threshold for livenessProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    # -- Enable readinessProbe on saltRim containers
+    enabled: true
+    # -- Initial delay seconds for readinessProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for readinessProbe
+    periodSeconds: 10
+    # -- Timeout seconds for readinessProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for readinessProbe
+    failureThreshold: 3
+    # -- Success threshold for readinessProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    # -- Enable startupProbe on saltRim containers
+    enabled: false
+    # -- Initial delay seconds for startupProbe
+    initialDelaySeconds: 0
+    # -- Period seconds for startupProbe
+    periodSeconds: 10
+    # -- Timeout seconds for startupProbe
+    timeoutSeconds: 1
+    # -- Failure threshold for startupProbe
+    failureThreshold: 3
+    # -- Success threshold for startupProbe
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: http
+  
+  # -- Custom livenessProbe that overrides the default one
+  customLivenessProbe: {}
+  # -- Custom readinessProbe that overrides the default one
+  customReadinessProbe: {}
+  # -- Custom startupProbe that overrides the default one
+  customStartupProbe: {}
+  ## saltRim resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  # -- Set saltRim container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if saltRim.resources is set (saltRim.resources is recommended for production).
+  # More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  resourcesPreset: "nano"
+  # -- Set saltRim container requests and limits for different resources like CPU or memory (essential for production workloads)
+  resources: {}
+  ## e.g:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext:
+    # -- Enable saltRim pods' Security Context
+    enabled: true
+    # -- Set filesystem group change policy for saltRim pods
+    fsGroupChangePolicy: Always
+    # -- settings using the sysctl interface for saltRim pods
+    sysctls: []
+    # -- Set filesystem extra groups for saltRim pods
+    supplementalGroups: []
+    # -- Set fsGroup in saltRim pods' Security Context
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext:
+    # -- Enabled saltRim container' Security Context
+    enabled: true
+    # -- Set SELinux options in saltRim container
+    seLinuxOptions: {}
+    # -- Set runAsUser in saltRim container' Security Context
+    runAsUser: 1001
+    runAsGroup: 1001
+    # -- Set runAsNonRoot in saltRim container' Security Context
+    runAsNonRoot: true
+    # -- Set readOnlyRootFilesystem in saltRim container' Security Context
+    readOnlyRootFilesystem: true
+    # -- Set privileged in saltRim container' Security Context
+    privileged: false
+    # -- Set allowPrivilegeEscalation in saltRim container' Security Context
+    allowPrivilegeEscalation: false
+    # -- List of capabilities to be dropped in saltRim container
+    capabilities:
+      drop: ["ALL"]
+    # -- Set seccomp profile in saltRim container
+    seccompProfile:
+      type: "RuntimeDefault"
+    
+  # -- Override default saltRim container command (useful when using custom images)
+  command: []
+  # -- Override default saltRim container args (useful when using custom images)
+  args: []
+  # -- Mount Service Account token in saltRim pods
+  automountServiceAccountToken: false
+  # -- Annotations for saltRim
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+  # -- saltRim pods host aliases
+  # ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  hostAliases: []
+
+  # -- Extra labels for saltRim pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+  # -- Annotations for saltRim pods
+  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # -- Pod affinity preset. Ignored if `saltRim.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAffinityPreset: ""
+  # -- Pod anti-affinity preset. Ignored if `saltRim.affinity` is set. Allowed values: `soft` or `hard`
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  podAntiAffinityPreset: soft
+  ## Node saltRim.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  nodeAffinityPreset:
+    # -- Node affinity preset type. Ignored if `saltRim.affinity` is set. Allowed values: `soft` or `hard`
+    type: ""
+    # -- Node label key to match. Ignored if `saltRim.affinity` is set
+    key: ""
+    # -- Node label values to match. Ignored if `saltRim.affinity` is set
+    values: []
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+  # -- Affinity for saltRim pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # NOTE: `saltRim.podAffinityPreset`, `saltRim.podAntiAffinityPreset`, and `saltRim.nodeAffinityPreset` will be ignored when it's set
+  affinity: {}
+  # -- Node labels for saltRim pods assignment
+  # ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  nodeSelector: {}
+  # --Tolerations for saltRim pods assignment
+  # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+  # -- Deployment strategy type
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  # -- Seconds saltRim pods need to terminate gracefully
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  terminationGracePeriodSeconds: ""
+  # -- Array with extra environment variables to add to saltRim containers
+  extraEnvVars: []
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+
+  # -- Name of existing ConfigMap containing extra env vars for saltRim containers
+  extraEnvVarsCM: ""
+  # -- Name of existing Secret containing extra env vars for saltRim containers
+  extraEnvVarsSecret: ""
+  # -- Optionally specify extra list of additional volumes for the saltRim pods
+  extraVolumes: []
+  # -- Optionally specify extra list of additional volumeMounts for the saltRim containers
+  extraVolumeMounts: []
+  # -- Add additional sidecar containers to the saltRim pods
+  sidecars: []
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+
+  # -- Add additional init containers to the saltRim pods
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+
+services:
+  barAssistant:
+    # -- The service type
+    type: ClusterIP
+    
+    ports:
+      - name: http
+        port: 8080
+        protocol: TCP
+    # -- barAssistant service Cluster IP
+    clusterIP: ""
+    ## e.g.:
+    ## clusterIP: None
+
+    # -- barAssistant service Load Balancer IP
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    loadBalancerIP: ""
+    # -- barAssistant service Load Balancer sources
+    # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    loadBalancerSourceRanges: []
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+
+    # -- barAssistant service external traffic policy
+    # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+    # -- Additional custom annotations for barAssistant service
+    annotations: {}
+    # -- Extra ports to expose in barAssistant service (normally used with the `sidecars` value)
+    extraPorts: []
+    # -- Control where client requests go, to the same pod or round-robin
+    # Values: ClientIP or None
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    sessionAffinity: None
+    # -- Additional settings for the sessionAffinity
+    sessionAffinityConfig: {}
+    ## e.g:
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+  meili:
+    # -- The service type
+    type: ClusterIP
+    
+    ports:
+      - name: http
+        port: 7700
+        protocol: TCP
+    # -- meili service Cluster IP
+    clusterIP: ""
+    ## e.g.:
+    ## clusterIP: None
+
+    # -- meili service Load Balancer IP
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    loadBalancerIP: ""
+    # -- meili service Load Balancer sources
+    # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    loadBalancerSourceRanges: []
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+
+    # -- meili service external traffic policy
+    # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+    # -- Additional custom annotations for meili service
+    annotations: {}
+    # -- Extra ports to expose in meili service (normally used with the `sidecars` value)
+    extraPorts: []
+    # -- Control where client requests go, to the same pod or round-robin
+    # Values: ClientIP or None
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    sessionAffinity: None
+    # -- Additional settings for the sessionAffinity
+    sessionAffinityConfig: {}
+    ## e.g:
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+  saltRim:
+    # -- The service type
+    type: ClusterIP
+    
+    ports:
+      - name: http
+        port: 8080
+        protocol: TCP
+    # -- saltRim service Cluster IP
+    clusterIP: ""
+    ## e.g.:
+    ## clusterIP: None
+
+    # -- saltRim service Load Balancer IP
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    loadBalancerIP: ""
+    # -- saltRim service Load Balancer sources
+    # ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    loadBalancerSourceRanges: []
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+
+    # -- saltRim service external traffic policy
+    # ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+    # -- Additional custom annotations for saltRim service
+    annotations: {}
+    # -- Extra ports to expose in saltRim service (normally used with the `sidecars` value)
+    extraPorts: []
+    # -- Control where client requests go, to the same pod or round-robin
+    # Values: ClientIP or None
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    sessionAffinity: None
+    # -- Additional settings for the sessionAffinity
+    sessionAffinityConfig: {}
+    ## e.g:
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+
+ingress:
+  # ref: http://kubernetes.io/docs/concepts/services-networking/ingress/
+  saltRim:
+    # -- Enable ingress record generation for salt-rim
+    enabled: false
+    # -- Ingress path type
+    pathType: Prefix
+    # -- Force Ingress API version (automatically detected if not set)
+    apiVersion: ""
+    # -- Default host for the ingress record
+    hostname: salt-rim.local
+    # -- IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+    # This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+    # ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+    ingressClassName: ""
+    # -- Default path for the ingress record
+    # NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    path: /
+    # -- Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+    # Use this parameter to set the required annotations for cert-manager, see
+    # ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+    annotations: {}
+    ## e.g:
+    ## annotations:
+    ##   kubernetes.io/ingress.class: nginx
+    ##   cert-manager.io/cluster-issuer: cluster-issuer-name
+    ##
+
+    # -- Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    # TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    # You can:
+    #   - Use the `ingress.secrets` parameter to create this TLS secret
+    #   - Rely on cert-manager to create it by setting the corresponding annotations
+    #   - Rely on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    tls: false
+    # -- Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    selfSigned: false
+    # -- An array with additional hostname(s) to be covered with the ingress record
+    extraHosts: []
+    ## e.g:
+    ## extraHosts:
+    ##   - name: salt-rim.local
+    ##     path: /
+    ##
+
+    # -- An array with additional arbitrary paths that may need to be added to the ingress under the main host
+    extraPaths: []
+    ## e.g:
+    ## extraPaths:
+    ## - path: /*
+    ##   backend:
+    ##     serviceName: ssl-redirect
+    ##     servicePort: use-annotation
+    ##
+
+    # -- TLS configuration for additional hostname(s) to be covered with this ingress record
+    # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    extraTls: []
+    ## e.g:
+    ## extraTls:
+    ## - hosts:
+    ##     - salt-rim.local
+    ##   secretName: salt-rim.local-tls
+    ##
+
+    # -- Custom TLS certificates as secrets
+    # NOTE: 'key' and 'certificate' are expected in PEM format
+    # NOTE: 'name' should line up with a 'secretName' set further up
+    secrets: []
+    ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+    ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+    ## It is also possible to create and manage the certificates outside of this helm chart
+    ## Please see README.md for more information
+    ## e.g:
+    ## secrets:
+    ##   - name: salt-rim.local-tls
+    ##     key: |-
+    ##       -----BEGIN RSA PRIVATE KEY-----
+    ##       ...
+    ##       -----END RSA PRIVATE KEY-----
+    ##     certificate: |-
+    ##       -----BEGIN CERTIFICATE-----
+    ##       ...
+    ##       -----END CERTIFICATE-----
+    ##
+
+    # -- Additional rules to be covered with this ingress record
+    # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    extraRules: []
+    ## e.g:
+    ## extraRules:
+    ## - host: example.local
+    ##     http:
+    ##       path: /
+    ##       backend:
+    ##         service:
+    ##           name: example-svc
+    ##           port:
+    ##             name: http
+    ##
+
+  # ref: http://kubernetes.io/docs/concepts/services-networking/ingress/
+  barAssistant:
+    # -- Enable ingress record generation for bar-assistant
+    enabled: false
+    # -- Ingress path type
+    pathType: ImplementationSpecific
+    # -- Force Ingress API version (automatically detected if not set)
+    apiVersion: ""
+    # -- Default host for the ingress record
+    hostname: bar-assistant.local
+    # -- IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+    # This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+    # ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+    ingressClassName: ""
+    # -- Default path for the ingress record
+    # NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    path: /bar(/|$)(.*)
+    # -- Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+    # Use this parameter to set the required annotations for cert-manager, see
+    # ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+    ## e.g:
+    ## annotations:
+    ##   kubernetes.io/ingress.class: nginx
+    ##   cert-manager.io/cluster-issuer: cluster-issuer-name
+    ##
+
+    # -- Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    # TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    # You can:
+    #   - Use the `ingress.secrets` parameter to create this TLS secret
+    #   - Rely on cert-manager to create it by setting the corresponding annotations
+    #   - Rely on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    tls: false
+    # -- Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    selfSigned: false
+    # -- An array with additional hostname(s) to be covered with the ingress record
+    extraHosts: []
+    ## e.g:
+    ## extraHosts:
+    ##   - name: bar-assistant.local
+    ##     path: /
+    ##
+
+    # -- An array with additional arbitrary paths that may need to be added to the ingress under the main host
+    extraPaths:
+      - path: /search(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bar-assistant-meili
+            port:
+              name: http
+    ## e.g:
+    ## extraPaths:
+    ## - path: /*
+    ##   backend:
+    ##     serviceName: ssl-redirect
+    ##     servicePort: use-annotation
+    ##
+
+    # -- TLS configuration for additional hostname(s) to be covered with this ingress record
+    # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    extraTls: []
+    ## e.g:
+    ## extraTls:
+    ## - hosts:
+    ##     - bar-assistant.local
+    ##   secretName: bar-assistant.local-tls
+    ##
+
+    # -- Custom TLS certificates as secrets
+    # NOTE: 'key' and 'certificate' are expected in PEM format
+    # NOTE: 'name' should line up with a 'secretName' set further up
+    secrets: []
+    ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+    ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+    ## It is also possible to create and manage the certificates outside of this helm chart
+    ## Please see README.md for more information
+    ## e.g:
+    ## secrets:
+    ##   - name: bar-assistant.local-tls
+    ##     key: |-
+    ##       -----BEGIN RSA PRIVATE KEY-----
+    ##       ...
+    ##       -----END RSA PRIVATE KEY-----
+    ##     certificate: |-
+    ##       -----BEGIN CERTIFICATE-----
+    ##       ...
+    ##       -----END CERTIFICATE-----
+    ##
+
+    # -- Additional rules to be covered with this ingress record
+    # ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    extraRules: []
+    ## e.g:
+    ## extraRules:
+    ## - host: example.local
+    ##     http:
+    ##       path: /
+    ##       backend:
+    ##         service:
+    ##           name: example-svc
+    ##           port:
+    ##             name: http
+    ##
+
+
+persistence:
+  meili:
+    # -- Enable persistence using Persistent Volume Claims
+    enabled: false
+    # -- Path to mount the volume at.
+    mountPath: /data/meilisearch-data
+    # -- The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+    subPath: ""
+    # -- Storage class of backing PVC
+    # If defined, storageClassName: <storageClass>
+    # If set to "-", storageClassName: "", which disables dynamic provisioning
+    # If undefined (the default) or set to null, no storageClassName spec is
+    #   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    #   GKE, AWS & OpenStack)
+    storageClass: ""
+    # -- Persistent Volume Claim annotations
+    annotations: {}
+    # -- Persistent Volume Access Modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of data volume
+    size: 8Gi
+    # -- The name of an existing PVC to use for persistence
+    existingClaim: ""
+    # -- Selector to match an existing Persistent Volume for WordPress data PVC
+    # If set, the PVC can't have a PV dynamically provisioned for it
+    selector: {}
+    ## e.g.
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+
+    # -- Custom PVC data source
+    dataSource: {}
+  barAssistant:
+    # -- Enable persistence using Persistent Volume Claims
+    enabled: false
+    # -- Path to mount the volume at.
+    mountPath: /data/bar-data
+    # -- The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+    subPath: ""
+    # -- Storage class of backing PVC
+    # If defined, storageClassName: <storageClass>
+    # If set to "-", storageClassName: "", which disables dynamic provisioning
+    # If undefined (the default) or set to null, no storageClassName spec is
+    #   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    #   GKE, AWS & OpenStack)
+    storageClass: ""
+    # -- Persistent Volume Claim annotations
+    annotations: {}
+    # -- Persistent Volume Access Modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of data volume
+    size: 8Gi
+    # -- The name of an existing PVC to use for persistence
+    existingClaim: ""
+    # -- Selector to match an existing Persistent Volume for WordPress data PVC
+    # If set, the PVC can't have a PV dynamically provisioned for it
+    selector: {}
+    ## e.g.
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+
+    # -- Custom PVC data source
+    dataSource: {}
+
+## ServiceAccount configuration
+##
+serviceAccount:
+  # -- Specifies whether a ServiceAccount should be created
+  create: true
+  # -- The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the common.names.fullname template
+  name: ""
+  # -- Additional Service Account annotations (evaluated as a template)
+  annotations: {}
+  # -- Automount service account token for the server service account
+  automountServiceAccountToken: true
+  
+
+
+## Secrets
+meiliMasterKeySecret:
+  value: ""
+  existingSecret: ""
+
+smtp:
+  # -- Enable configuration of the SMTP secret
+  enabled: false
+  # -- The SMTP host.
+  host: ""
+  # -- The SMTP port.
+  port: 25
+  # -- Use TLS when connecting to the server, typically for port 465.
+  secure: false
+
+  from:
+    # -- The email address from which emails will be sent.
+    address: ""
+    # -- The name associated with the email address from which emails will be sent.
+    name: "Bar Assistant"
+  
+  auth:
+    # -- The username for the SMTP server.
+    username: ""
+    # -- The password for the SMTP server.
+    password: ""
+    # -- An existing secret containing the SMTP server username and password.
+    existingSecret: ""
+
+oauth:
+  # -- Enables authentication via OAuth
+  enabled: false
+  # -- The base URL of the OAuth host.
+  baseUrl: ""
+  # -- The redirect URI
+  redirectUri: ""
+  # -- The OAuth realm (Keycloak).
+  realm: ""
+  
+  client:
+    # -- The client id of your configured client in your provider
+    id: ""
+    # -- The client secret of your configured client in your provider
+    secret: ""
+    # -- Existing secret containing the client ID and secret (keys should be clientID and clientSecret)
+    existingSecret: ""
+
+## Subchart configuration
+redis:
+  enabled: false
+
+
