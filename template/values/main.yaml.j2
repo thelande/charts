@@ -157,6 +157,7 @@ metrics:
     ##
 {% endif %}
 
+## Secrets
 {%- for secret in secrets %}
 {{ secret.values_section_name }}Secret:
   {%- for key in secret.secret_keys %}
@@ -164,7 +165,57 @@ metrics:
   {%- endfor %}
   existingSecret: ""
 {% endfor %}
+
+{%- if smtp %}
+smtp:
+  # -- Enable configuration of the SMTP secret
+  enabled: false
+  # -- The SMTP host.
+  host: ""
+  # -- The SMTP port.
+  port: 25
+  # -- Use TLS when connecting to the server, typically for port 465.
+  secure: false
+
+  from:
+    # -- The email address from which emails will be sent.
+    address: ""
+    # -- The name associated with the email address from which emails will be sent.
+    name: "Bar Assistant"
+  
+  auth:
+    # -- The username for the SMTP server.
+    username: ""
+    # -- The password for the SMTP server.
+    password: ""
+    # -- An existing secret containing the SMTP server username and password.
+    existingSecret: ""
+{% endif %}
+
+{%- if oauth %}
+oauth:
+  # -- Enables authentication via OAuth
+  enabled: false
+  # -- The base URL of the OAuth host.
+  baseUrl: ""
+  # -- The redirect URI
+  redirectUri: ""
+  # -- The OAuth realm (Keycloak).
+  realm: ""
+  
+  client:
+    # -- The client id of your configured client in your provider
+    id: ""
+    # -- The client secret of your configured client in your provider
+    secret: ""
+    # -- Existing secret containing the client ID and secret (keys should be clientID and clientSecret)
+    existingSecret: ""
+{% endif %}
+
+{%- if subcharts %}
+## Subchart configuration
 {%- for chart in subcharts %}
 {{ chart.name }}:
   enabled: false
 {% endfor %}
+{% endif %}

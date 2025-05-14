@@ -66,13 +66,13 @@ class BasePortBlock(NamedBlock):
 class EnvBlock(NamedBlock):
     value: str | None = None
     value_from: dict[str, Any] | None = None
-    
+
     @model_validator(mode="after")
     def validate_value(self) -> Self:
         if self.value is None and self.value_from is None:
             raise ValidationError("Either value or value_from must be set.")
         return self
-    
+
     def valuefrom_to_yaml(self):
         return yaml.dump(self.value_from)
 
@@ -194,6 +194,12 @@ class ChartDefinition(BaseModel):
     subcharts: Annotated[list[SubchartDefinition], Field(default_factory=list)]
     disabled_templates: Annotated[list[str], Field(default_factory=list)]
 
+    # Include an SMTP configuration block and secret, when True.
+    smtp: bool = False
+
+    # Include an OAuth configuration block and secret, when True.
+    oauth: bool = False
+
     services: Annotated[list[ServiceBlock], Field(default_factory=list)]
     ingresses: Annotated[list[IngressBlock], Field(default_factory=list)]
     persistence: Annotated[list[PersistenceBlock], Field(default_factory=list)]
@@ -260,6 +266,30 @@ class ChartDefinition(BaseModel):
             Path("templates/service-account.yaml"),
             helm_tmpl_env,
         )
+
+        if self.smtp:
+            log.info("Rendering SMTP ConfigMap and Secret")
+            self._render_template(
+                "smtp-secret.yaml.j2", Path("templates/smtp-secret.yaml"), helm_tmpl_env
+            )
+            self._render_template(
+                "smtp-configmap.yaml.j2",
+                Path("templates/smtp-configmap.yaml"),
+                helm_tmpl_env,
+            )
+
+        if self.oauth:
+            log.info("Rendering OAuth ConfigMap and Secret")
+            self._render_template(
+                "oauth-secret.yaml.j2",
+                Path("templates/oauth-secret.yaml"),
+                helm_tmpl_env,
+            )
+            self._render_template(
+                "oauth-configmap.yaml.j2",
+                Path("templates/oauth-configmap.yaml"),
+                helm_tmpl_env,
+            )
 
         self._render_components(helm_tmpl_env)
         self._render_secrets(helm_tmpl_env)
