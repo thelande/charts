@@ -27,6 +27,7 @@
     {%- for port in component.ports %}
     - name: {{ port.name }}
       containerPort: {{ port.port }}
+      protocol: {{ port.protocol }}
     {%- endfor %}
   ## e.g:
   ## containerPorts:
@@ -154,9 +155,23 @@
       type: "RuntimeDefault"
     
   # -- Override default {{ component.values_section_name }} container command (useful when using custom images)
+  {%- if not component.command %}
   command: []
+  {%- else %}
+  command:
+  {%- for elem in component.command %}
+    - '{{ elem }}'
+  {%- endfor %}
+  {%- endif %}
   # -- Override default {{ component.values_section_name }} container args (useful when using custom images)
+  {%- if not component.args %}
   args: []
+  {%- else %}
+  args:
+  {%- for elem in component.args %}
+    - '{{ elem }}'
+  {%- endfor %}
+  {%- endif %}
   # -- Mount Service Account token in {{ component.values_section_name }} pods
   automountServiceAccountToken: false
   # -- Annotations for {{ component.values_section_name }}
