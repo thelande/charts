@@ -22,7 +22,9 @@ dependencies:
     version: 2.x.x
 description: {{ description }}
 home: {{ homepage }}
+{%- if icon %}
 icon: {{ icon }}
+{%- endif %}
 {%- if keywords %}
 keywords:
   {%- for keyword in keywords %}
