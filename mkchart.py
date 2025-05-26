@@ -105,6 +105,9 @@ class ComponentBlock(NamedBlock):
     envFromSecret: str | None = None
     persistence: bool | None = None
 
+    command: Annotated[list[str], Field(default_factory=list)]
+    args: Annotated[list[str], Field(default_factory=list)]
+
     liveness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
     readiness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
     startup_probe: Annotated[
