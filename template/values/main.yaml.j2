@@ -156,7 +156,7 @@ metrics:
     ##   prometheus: my-prometheus
     ##
 {% endif %}
-
+{%- if secrets %}
 ## Secrets
 {%- for secret in secrets %}
 {{ secret.values_section_name }}Secret:
@@ -165,7 +165,7 @@ metrics:
   {%- endfor %}
   existingSecret: ""
 {% endfor %}
-
+{% endif %}
 {%- if smtp %}
 smtp:
   # -- Enable configuration of the SMTP secret
