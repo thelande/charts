@@ -1,7 +1,7 @@
 {%- for service in services %}
   {{ service.values_section_name }}:
     # -- The service type
-    type: ClusterIP
+    type: {{ service.service_type }}
     
     ports:
       {%- for port in service.ports %}

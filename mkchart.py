@@ -125,6 +125,7 @@ class ServicePortBlock(BasePortBlock):
 
 
 class ServiceBlock(NamedBlock):
+    service_type: str | None = "ClusterIP"
     component: str | None = None  # Defaults to the service's `name` in model_post_init
     ports: list[ServicePortBlock]
 
