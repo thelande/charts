@@ -4,19 +4,29 @@ SPDX-License-Identifier: APACHE-2.0
 */}}
 {% for component in components %}
 {{/*
-Return the proper [[ component.name ]] name
+Return the proper [[ component.values_section_name ]] name
 */}}
-{{- define "[[ chart_name ]].[[ component.name ]].fullname" -}}
+{{- define "[[ chart_name ]].[[ component.values_section_name ]].fullname" -}}
 {{ printf "%s-[[ component.name ]]" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 {% endfor %}
 {%- for component in components %}
 {{/*
-Return the proper [[ component.name ]] image name
+Return the proper [[ component.values_section_name ]] image name
 */}}
-{{- define "[[ chart_name ]].[[ component.name ]].image" -}}
+{{- define "[[ chart_name ]].[[ component.values_section_name ]].image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.[[ component.values_section_name ]].image "global" .Values.global) }}
 {{- end -}}
+{% endfor %}
+{%- for component in components %}
+{%- if component.persistence %}
+{{/*
+Return the proper image name (for the init container volume-permissions image)
+*/}}
+{{- define "[[ chart_name ]].[[ component.values_section_name ]].volumePermissions.image" -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.[[ component.values_section_name ]].volumePermissions.image "global" .Values.global ) -}}
+{{- end -}}
+{%- endif %}
 {% endfor %}
 {{/*
 Return the proper Docker Image Registry Secret Names

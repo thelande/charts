@@ -1,0 +1,64 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitors.prusaExporter.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "prusa-exporter.prusaExporter.fullname" . }}
+  namespace: {{ default (include "common.names.namespace" .) .Values.metrics.serviceMonitors.prusaExporter.namespace | quote }}
+  {{- $labels := include "common.tplvalues.merge" (dict "values" (list .Values.metrics.serviceMonitors.prusaExporter.labels .Values.commonLabels) "context" .) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: prusa-exporter
+  {{- if or .Values.metrics.serviceMonitors.prusaExporter.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.metrics.serviceMonitors.prusaExporter.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  jobLabel: {{ .Values.metrics.serviceMonitors.prusaExporter.jobLabel | quote }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 6 }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.selector }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.metrics.serviceMonitors.prusaExporter.selector "context" $) | nindent 6 }}
+      {{- end }}
+  endpoints:
+    - port: http
+      path: "/metrics/prusalink"
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.interval }}
+      interval: {{ .Values.metrics.serviceMonitors.prusaExporter.interval }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.metrics.serviceMonitors.prusaExporter.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.honorLabels }}
+      honorLabels: {{ .Values.metrics.serviceMonitors.prusaExporter.honorLabels }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.metricRelabelings }}
+      metricRelabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.prusaExporter.metricRelabelings "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.relabelings }}
+      relabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.prusaExporter.relabelings "context" $) | nindent 8 }}
+      {{- end }}
+    - port: http
+      path: "/metrics/udp"
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.interval }}
+      interval: {{ .Values.metrics.serviceMonitors.prusaExporter.interval }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.metrics.serviceMonitors.prusaExporter.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.honorLabels }}
+      honorLabels: {{ .Values.metrics.serviceMonitors.prusaExporter.honorLabels }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.metricRelabelings }}
+      metricRelabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.prusaExporter.metricRelabelings "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.prusaExporter.relabelings }}
+      relabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.prusaExporter.relabelings "context" $) | nindent 8 }}
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+    - {{ include "common.names.namespace" . | quote }}
+{{- end }}

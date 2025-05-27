@@ -110,52 +110,6 @@ persistence:
 {% include "values/service-account.yaml.j2" %}
 {% endif %}{# if "service-account" not in disabled_templates #}
 
-{%- if "servicemonitor" not in disabled_templates %}
-## Prometheus metrics
-##
-metrics:
-  # -- Enable the export of Prometheus metrics
-  enabled: false
-  ## Prometheus Operator ServiceMonitor configuration
-  ##
-  serviceMonitor:
-    # -- If `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)
-    enabled: false
-    # -- Namespace in which Prometheus is running.
-    namespace: ""
-    #--  Additional custom annotations for the ServiceMonitor
-    annotations: {}
-    # -- Extra labels for the ServiceMonitor
-    labels: {}
-    # -- The name of the label on the target service to use as the job name in Prometheus
-    jobLabel: ""
-    # -- honorLabels chooses the metric's labels on collisions with target labels
-    honorLabels: false
-    # -- Interval at which metrics should be scraped.
-    # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-    interval: ""
-    ## e.g:
-    ## interval: 10s
-    ##
-
-    # -- Timeout after which the scrape is ended
-    # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-    scrapeTimeout: ""
-    ## e.g:
-    ## scrapeTimeout: 10s
-    ##
-
-    # -- Specify additional relabeling of metrics
-    metricRelabelings: []
-    # -- Specify general relabeling
-    relabelings: []
-    # -- Prometheus instance selector labels
-    # ref: https://github.com/bitnami/charts/tree/main/bitnami/prometheus-operator#prometheus-configuration
-    selector: {}
-    ## selector:
-    ##   prometheus: my-prometheus
-    ##
-{% endif %}
 {%- if secrets %}
 ## Secrets
 {%- for secret in secrets %}
@@ -211,6 +165,51 @@ oauth:
     # -- Existing secret containing the client ID and secret (keys should be clientID and clientSecret)
     existingSecret: ""
 {% endif %}
+
+metrics:
+  enabled: false
+  {%- if service_monitors %}
+  serviceMonitors:
+    {%- for sm in service_monitors %}
+    {{ sm.values_section_name }}:
+      # -- If `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`)
+      enabled: {{ sm.enabled | tojson }}
+      # -- Namespace in which Prometheus is running.
+      namespace: ""
+      #--  Additional custom annotations for the ServiceMonitor
+      annotations: {}
+      # -- Extra labels for the ServiceMonitor
+      labels: {}
+      # -- The name of the label on the target service to use as the job name in Prometheus
+      jobLabel: ""
+      # -- honorLabels chooses the metric's labels on collisions with target labels
+      honorLabels: false
+      # -- Interval at which metrics should be scraped.
+      # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+      interval: ""
+      ## e.g:
+      ## interval: 10s
+      ##
+
+      # -- Timeout after which the scrape is ended
+      # ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+      scrapeTimeout: ""
+      ## e.g:
+      ## scrapeTimeout: 10s
+      ##
+
+      # -- Specify additional relabeling of metrics
+      metricRelabelings: []
+      # -- Specify general relabeling
+      relabelings: []
+      # -- Prometheus instance selector labels
+      # ref: https://github.com/bitnami/charts/tree/main/bitnami/prometheus-operator#prometheus-configuration
+      selector: {}
+      ## selector:
+      ##   prometheus: my-prometheus
+      ##
+    {%- endfor %}
+  {% endif %}
 
 {%- if subcharts %}
 ## Subchart configuration

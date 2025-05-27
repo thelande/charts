@@ -1,0 +1,68 @@
+chart_name: prusa-exporter
+app_version: 2.0.0-alpha2
+description: >-
+  Prometheus exporter for Prusa3D printers - supports Prusa Link API and Syslog
+  metrics as well as logs from printer.
+category: 3D Printing
+homepage: https://prusa3d.com/
+app_source: https://github.com/pstrobl96/prusa_exporter
+
+components:
+  - name: prusa-exporter
+    values_section_name: prusaExporter
+    type: deployment
+    image:
+      repository: pubeldev/prusa_exporter
+      tag: '2.0.0-alpha2'
+    ports:
+      - name: http
+        port: 10009
+      - name: prusalink
+        port: 8514
+        protocol: UDP
+    args:
+      - '--config.file=/config/prusa.yml'
+      - '--log.level=info'
+      - '--prusalink.scrape-timeout=5'
+
+services:
+  - name: prusa-exporter
+    values_section_name: prusaExporter
+    ports:
+      - name: http
+        port: 10009
+  - name: prusa-exporter-prusalink
+    values_section_name: prusaExporterPrusalink
+    component: prusa-exporter
+    service_type: LoadBalancer
+    ports:
+      - name: prusalink
+        port: 8514
+        protocol: UDP
+
+secrets:
+  - name: prusa-exporter
+    values_section_name: prusaExporter
+    secret_keys:
+      - name: prusa
+
+service_monitors:
+  - name: prusa-exporter
+    values_section_name: prusaExporter
+    endpoints:
+      - port_name: http
+        path: /metrics/prusalink
+      - port_name: http
+        path: /metrics/udp
+
+disabled_templates:
+  - clusterrolebinding
+  - daemonset
+  - extra-list
+  - hpa
+  - networkpolicy
+  - pdb
+  - role
+  - statefulset
+  - tls-secret
+  - vpa

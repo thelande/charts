@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ template "[[ chart.chart_name ]].[[ component.name ]].fullname" . }}
+  name: {{ template "[[ chart.chart_name ]].[[ component.values_section_name ]].fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: [[ component.name ]]
@@ -78,7 +78,7 @@ spec:
       {{- end }}
       containers:
         - name: [[ component.name ]]
-          image: {{ template "[[ chart.chart_name ]].[[ component.name ]].image" . }}
+          image: {{ template "[[ chart.chart_name ]].[[ component.values_section_name ]].image" . }}
           imagePullPolicy: {{ .Values.[[ component.values_section_name ]].image.pullPolicy }}
           {{- if .Values.[[ component.values_section_name ]].containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.[[ component.values_section_name ]].containerSecurityContext "context" $) | nindent 12 }}

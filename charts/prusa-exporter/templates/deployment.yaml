@@ -1,0 +1,147 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ template "prusa-exporter.prusaExporter.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: prusa-exporter
+  {{- if or .Values.prusaExporter.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.prusaExporter.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.prusaExporter.replicaCount }}
+  {{- if .Values.prusaExporter.updateStrategy }}
+  strategy: {{- toYaml .Values.prusaExporter.updateStrategy | nindent 4 }}
+  {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.prusaExporter.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: prusa-exporter
+  template:
+    metadata:
+      {{- if .Values.prusaExporter.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: prusa-exporter
+    spec:
+      {{- include "prusa-exporter.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "prusa-exporter.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.prusaExporter.automountServiceAccountToken }}
+      {{- if .Values.prusaExporter.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.prusaExporter.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prusaExporter.podAffinityPreset "component" "prusa-exporter" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prusaExporter.podAntiAffinityPreset "component" "prusa-exporter" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.prusaExporter.nodeAffinityPreset.type "key" .Values.prusaExporter.nodeAffinityPreset.key "values" .Values.prusaExporter.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.prusaExporter.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.priorityClassName }}
+      priorityClassName: {{ .Values.prusaExporter.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.prusaExporter.schedulerName }}
+      schedulerName: {{ .Values.prusaExporter.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.prusaExporter.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.prusaExporter.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.prusaExporter.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.prusaExporter.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- with .Values.prusaExporter.initContainers }}
+      initContainers:
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: prusa-exporter
+          image: {{ template "prusa-exporter.prusaExporter.image" . }}
+          imagePullPolicy: {{ .Values.prusaExporter.image.pullPolicy }}
+          {{- if .Values.prusaExporter.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.prusaExporter.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.prusaExporter.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.prusaExporter.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            {{- if .Values.prusaExporter.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.prusaExporter.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.prusaExporter.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.prusaExporter.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.prusaExporter.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.prusaExporter.resources }}
+          resources: {{- toYaml .Values.prusaExporter.resources | nindent 12 }}
+          {{- else if ne .Values.prusaExporter.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.prusaExporter.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.prusaExporter.containerPorts }}
+          ports:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.prusaExporter.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.prusaExporter.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prusaExporter.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.prusaExporter.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.prusaExporter.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prusaExporter.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.prusaExporter.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.prusaExporter.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prusaExporter.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.prusaExporter.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+          {{- if .Values.prusaExporter.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.prusaExporter.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.prusaExporter.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        {{- if .Values.prusaExporter.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.prusaExporter.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}

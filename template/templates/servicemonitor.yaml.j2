@@ -1,0 +1,49 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "[[ chart.chart_name ]].[[ servicemonitor.componentObj.values_section_name ]].fullname" . }}{% if servicemonitor.name != servicemonitor.component %}-[[ servicemonitor.name ]]{% endif %}
+  namespace: {{ default (include "common.names.namespace" .) .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].namespace | quote }}
+  {{- $labels := include "common.tplvalues.merge" (dict "values" (list .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].labels .Values.commonLabels) "context" .) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: [[ servicemonitor.component ]]
+  {{- if or .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  jobLabel: {{ .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].jobLabel | quote }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 6 }}
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].selector }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].selector "context" $) | nindent 6 }}
+      {{- end }}
+  endpoints:
+  {%- for endpoint in servicemonitor.endpoints %}
+    - port: [[ endpoint.port_name ]]
+      path: "[[ endpoint.path ]]"
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].interval }}
+      interval: {{ .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].interval }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].scrapeTimeout }}
+      scrapeTimeout: {{ .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].honorLabels }}
+      honorLabels: {{ .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].honorLabels }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].metricRelabelings }}
+      metricRelabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].metricRelabelings "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].relabelings }}
+      relabelings: {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].relabelings "context" $) | nindent 8 }}
+      {{- end }}
+    {%- endfor %}
+  namespaceSelector:
+    matchNames:
+    - {{ include "common.names.namespace" . | quote }}
+{{- end }}

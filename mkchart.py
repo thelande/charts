@@ -5,6 +5,7 @@ Generate a new helm chart using templates.
 
 import logging
 import os
+import re
 import shutil
 import subprocess
 import typer
@@ -12,7 +13,14 @@ import yaml
 from enum import Enum
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathlib import Path
-from pydantic import BaseModel, ConfigDict, Field, model_validator, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    ValidationError,
+)
 from rich.console import Console
 from rich.logging import RichHandler
 from typing_extensions import Annotated, Any, Self
@@ -40,6 +48,24 @@ class NamedBlock(BaseModel):
         super().model_post_init(context)
         if not self.values_section_name:
             self.values_section_name = self.name
+
+
+class Rfc1035NamedBlock(NamedBlock):
+    @field_validator("name", mode="after")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        """Validate that the provided name is a valid RFC 1035 name."""
+        pattern = r"^[a-z][a-z0-9-]*[a-z0-9]?$"
+        max_length = 63
+        if len(value) > max_length:
+            raise ValueError(
+                f"name cannot be more than {max_length} characters: {len(value)}"
+            )
+
+        if not re.match(pattern, value):
+            raise ValueError(f"name is not a valid RFC 1035 name: {value}")
+
+        return value
 
 
 class SubchartDefinition(NamedBlock):
@@ -94,7 +120,7 @@ class ProbeBlock(BaseModel):
     http_probe: ProbeHttpGet = ProbeHttpGet()
 
 
-class ComponentBlock(NamedBlock):
+class ComponentBlock(Rfc1035NamedBlock):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: ImageBlock
@@ -122,20 +148,24 @@ class ComponentBlock(NamedBlock):
         return self
 
 
-class ServicePortBlock(BasePortBlock):
-    target_port: int | None = None
-    node_port: int | None = None
-
-
-class ServiceBlock(NamedBlock):
-    service_type: str | None = "ClusterIP"
-    component: str | None = None  # Defaults to the service's `name` in model_post_init
-    ports: list[ServicePortBlock]
+class Rfc1035NamedBlockWithComponent(Rfc1035NamedBlock):
+    component: str | None = None
+    componentObj: ComponentBlock | None = None
 
     def model_post_init(self, context: Any) -> None:
         super().model_post_init(context)
         if not self.component:
             self.component = self.name
+
+
+class ServicePortBlock(BasePortBlock):
+    target_port: int | None = None
+    node_port: int | None = None
+
+
+class ServiceBlock(Rfc1035NamedBlockWithComponent):
+    service_type: str | None = "ClusterIP"
+    ports: list[ServicePortBlock]
 
 
 class IngressPathMixin(BaseModel):
@@ -149,7 +179,7 @@ class PathBlock(BaseModel):
     backend: IngressPathMixin
 
 
-class IngressBlock(NamedBlock, IngressPathMixin):
+class IngressBlock(Rfc1035NamedBlock, IngressPathMixin):
     path: str = "/"
     path_type: str = "ImplementationSpecific"
     annotations: Annotated[dict[str, str], Field(default_factory=dict)]
@@ -164,19 +194,26 @@ class IngressBlock(NamedBlock, IngressPathMixin):
             self.service = self.name
 
 
-class PersistenceBlock(NamedBlock):
+class PersistenceBlock(Rfc1035NamedBlockWithComponent):
     mount_path: str
-    component: str | None = None  # Defaults to the PVC's `name` in model_post_init
-
-    def model_post_init(self, context: Any) -> None:
-        super().model_post_init(context)
-        if not self.component:
-            self.component = self.name
 
 
-class SecretBlock(NamedBlock):
-    secret_keys: list[NamedBlock]
-    component: str
+class SecretBlock(Rfc1035NamedBlockWithComponent):
+    secret_keys: list[Rfc1035NamedBlock]
+
+
+class ConfigMapBlock(Rfc1035NamedBlockWithComponent):
+    contents: dict[str, str]
+
+
+class ServiceMonitorEndpointBlock(BaseModel):
+    port_name: str
+    path: str
+
+
+class ServiceMonitorBlock(Rfc1035NamedBlockWithComponent):
+    enabled: bool = False
+    endpoints: Annotated[list[ServiceMonitorEndpointBlock], Field(default_factory=list)]
 
 
 class ChartDefinition(BaseModel):
@@ -208,6 +245,8 @@ class ChartDefinition(BaseModel):
     ingresses: Annotated[list[IngressBlock], Field(default_factory=list)]
     persistence: Annotated[list[PersistenceBlock], Field(default_factory=list)]
     secrets: Annotated[list[SecretBlock], Field(default_factory=list)]
+    configmaps: Annotated[list[ConfigMapBlock], Field(default_factory=list)]
+    service_monitors: Annotated[list[ServiceMonitorBlock], Field(default_factory=list)]
 
     @classmethod
     def from_file(cls, config_file: typer.FileText):
@@ -297,17 +336,41 @@ class ChartDefinition(BaseModel):
 
         self._render_components(helm_tmpl_env)
         self._render_secrets(helm_tmpl_env)
+        self._render_configmaps(helm_tmpl_env)
         self._render_services(helm_tmpl_env)
+        self._render_service_monitors(helm_tmpl_env)
         self._render_ingresses(helm_tmpl_env)
         self._render_pvcs(helm_tmpl_env)
 
+    def _render_service_monitors(self, env: Environment):
+        """Render the service monitor helm templates."""
+        sm_count = len(self.service_monitors)
+        for sm in self.service_monitors:
+            # Verify the service matches a component.
+            try:
+                sm.componentObj = self.get_component_by_name(sm.component)
+            except ValueError:
+                raise ValueError(
+                    f"ServiceMonitor is not associated with a known component: {sm.name}"
+                )
+
+            log.info(f"Rendering ServiceMonitor: {sm.name}")
+            sm_filename = "servicemonitor.yaml"
+            if sm_count > 1:
+                sm_filename = f"{sm.name}-servicemonitor.yaml"
+            context = {"chart": self, "servicemonitor": sm}
+            self._render_template(
+                "servicemonitor.yaml.j2", Path("templates") / sm_filename, env, context
+            )
+
     def _render_services(self, env: Environment):
         """Render the service helm templates."""
-        component_names = self.get_component_names()
         service_count = len(self.services)
         for service in self.services:
             # Verify the service matches a component.
-            if service.component not in component_names:
+            try:
+                service.componentObj = self.get_component_by_name(service.component)
+            except ValueError:
                 raise ValueError(
                     f"Service is not associated with a known component: {service.name}"
                 )
@@ -323,11 +386,12 @@ class ChartDefinition(BaseModel):
 
     def _render_secrets(self, env: Environment):
         """Render the secret helm templates."""
-        component_names = self.get_component_names()
         secret_count = len(self.secrets)
         for secret in self.secrets:
             # Verify the service matches a component.
-            if secret.component not in component_names:
+            try:
+                secret.componentObj = self.get_component_by_name(secret.component)
+            except ValueError:
                 raise ValueError(
                     f"Secret is not associated with a known component: {secret.name}"
                 )
@@ -339,6 +403,27 @@ class ChartDefinition(BaseModel):
             context = {"chart": self, "secret": secret}
             self._render_template(
                 "secret.yaml.j2", Path("templates") / secret_filename, env, context
+            )
+
+    def _render_configmaps(self, env: Environment):
+        """Render the config map helm templates."""
+        cm_count = len(self.configmaps)
+        for cm in self.configmaps:
+            # Verify the service matches a component.
+            try:
+                cm.componentObj = self.get_component_by_name(cm.component)
+            except ValueError:
+                raise ValueError(
+                    f"ConfigMap is not associated with a known component: {cm.name}"
+                )
+
+            log.info(f"Rendering ConfigMap: {cm.name}")
+            cm_filename = "configmap.yaml"
+            if cm_count > 1:
+                cm_filename = f"{cm.name}-configmap.yaml"
+            context = {"chart": self, "configmap": cm}
+            self._render_template(
+                "configmap.yaml.j2", Path("templates") / cm_filename, env, context
             )
 
     def _render_ingresses(self, env: Environment):
@@ -363,18 +448,18 @@ class ChartDefinition(BaseModel):
 
     def _render_pvcs(self, env: Environment):
         """Render the PersistentVolumeClaim helm templates."""
-        component_names = self.get_component_names()
         pvc_count = len(self.persistence)
         for pvc in self.persistence:
             # Verify the PVC matches a component.
-            if pvc.component not in component_names:
+            try:
+                pvc.componentObj = self.get_component_by_name(pvc.component)
+            except ValueError:
                 raise ValueError(
                     f"PVC is not associated with a known component: {pvc.name}"
                 )
 
             # Do not render the PVC if it belongs to a StatefulSet.
-            component = self.get_component_by_name(pvc.component)
-            if component.type != ComponentType.STATEFULSET:
+            if pvc.componentObj.type != ComponentType.STATEFULSET:
                 log.info(f"Rendering PVC: {pvc.name}")
                 pvc_filename = "pvc.yaml"
                 if pvc_count > 1:
@@ -545,7 +630,12 @@ def main(
     ] = Path("template"),
 ):
     """Generate a new helm chart from a template directory."""
-    chart_def = ChartDefinition.from_file(config_file)
+    try:
+        chart_def = ChartDefinition.from_file(config_file)
+    except ValidationError as exc:
+        log.error("Validation error: %s", exc)
+        raise typer.Exit(1)
+
     try:
         chart_def.create_chart_directory(overwrite)
     except FileExistsError:

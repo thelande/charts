@@ -1,0 +1,24 @@
+# Copyright Thomas Helander. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+annotations:
+  category: 3D Printing
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 2.0.0-alpha2
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: Prometheus exporter for Prusa3D printers - supports Prusa Link API and Syslog metrics as well as logs from printer.
+home: https://prusa3d.com/
+maintainers:
+  - name: Tom Helander
+    url: https://github.com/thelande/charts
+name: prusa-exporter
+sources:
+  - https://github.com/thelande/charts/tree/main/charts/prusa-exporter
+  - https://github.com/pstrobl96/prusa_exporter
+version: 0.1.0
