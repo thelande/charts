@@ -92,6 +92,20 @@ entries:
   docmost:
   - apiVersion: v2
     appVersion: 0.20.3
+    created: "2025-06-01T23:28:10.7106856Z"
+    description: 'Docmost is an open-source collaborative wiki and documentation software.
+      It is an open-source alternative to Confluence and Notion. '
+    digest: 005c06136a2fb88ad1461067fd4ce9ce8af6bd674c7e22d6c2ae8c001fe7505b
+    home: https://docmost.com/
+    name: docmost
+    sources:
+    - https://github.com/docmost/docmost
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/docmost-0.3.1/docmost-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v2
+    appVersion: 0.20.3
     created: "2025-04-26T00:18:26.329315276Z"
     description: 'Docmost is an open-source collaborative wiki and documentation software.
       It is an open-source alternative to Confluence and Notion. '
@@ -846,4 +860,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-27T03:41:14.699922507Z"
+generated: "2025-06-01T23:28:10.710808698Z"
