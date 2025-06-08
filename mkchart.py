@@ -150,7 +150,7 @@ class ComponentBlock(Rfc1035NamedBlock):
 
 class Rfc1035NamedBlockWithComponent(Rfc1035NamedBlock):
     component: str | None = None
-    componentObj: ComponentBlock | None = None
+    component_obj: ComponentBlock | None = None
 
     def model_post_init(self, context: Any) -> None:
         super().model_post_init(context)
@@ -348,7 +348,7 @@ class ChartDefinition(BaseModel):
         for sm in self.service_monitors:
             # Verify the service matches a component.
             try:
-                sm.componentObj = self.get_component_by_name(sm.component)
+                sm.component_obj = self.get_component_by_name(sm.component)
             except ValueError:
                 raise ValueError(
                     f"ServiceMonitor is not associated with a known component: {sm.name}"
@@ -369,7 +369,7 @@ class ChartDefinition(BaseModel):
         for service in self.services:
             # Verify the service matches a component.
             try:
-                service.componentObj = self.get_component_by_name(service.component)
+                service.component_obj = self.get_component_by_name(service.component)
             except ValueError:
                 raise ValueError(
                     f"Service is not associated with a known component: {service.name}"
@@ -390,7 +390,7 @@ class ChartDefinition(BaseModel):
         for secret in self.secrets:
             # Verify the service matches a component.
             try:
-                secret.componentObj = self.get_component_by_name(secret.component)
+                secret.component_obj = self.get_component_by_name(secret.component)
             except ValueError:
                 raise ValueError(
                     f"Secret is not associated with a known component: {secret.name}"
@@ -411,7 +411,7 @@ class ChartDefinition(BaseModel):
         for cm in self.configmaps:
             # Verify the service matches a component.
             try:
-                cm.componentObj = self.get_component_by_name(cm.component)
+                cm.component_obj = self.get_component_by_name(cm.component)
             except ValueError:
                 raise ValueError(
                     f"ConfigMap is not associated with a known component: {cm.name}"
@@ -452,14 +452,14 @@ class ChartDefinition(BaseModel):
         for pvc in self.persistence:
             # Verify the PVC matches a component.
             try:
-                pvc.componentObj = self.get_component_by_name(pvc.component)
+                pvc.component_obj = self.get_component_by_name(pvc.component)
             except ValueError:
                 raise ValueError(
                     f"PVC is not associated with a known component: {pvc.name}"
                 )
 
             # Do not render the PVC if it belongs to a StatefulSet.
-            if pvc.componentObj.type != ComponentType.STATEFULSET:
+            if pvc.component_obj.type != ComponentType.STATEFULSET:
                 log.info(f"Rendering PVC: {pvc.name}")
                 pvc_filename = "pvc.yaml"
                 if pvc_count > 1:
