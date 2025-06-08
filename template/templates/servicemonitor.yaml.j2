@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "[[ chart.chart_name ]].[[ servicemonitor.componentObj.values_section_name ]].fullname" . }}{% if servicemonitor.name != servicemonitor.component %}-[[ servicemonitor.name ]]{% endif %}
+  name: {{ template "[[ chart.chart_name ]].[[ servicemonitor.component_obj.values_section_name ]].fullname" . }}{% if servicemonitor.name != servicemonitor.component %}-[[ servicemonitor.name ]]{% endif %}
   namespace: {{ default (include "common.names.namespace" .) .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].namespace | quote }}
   {{- $labels := include "common.tplvalues.merge" (dict "values" (list .Values.metrics.serviceMonitors.[[ servicemonitor.values_section_name ]].labels .Values.commonLabels) "context" .) }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}

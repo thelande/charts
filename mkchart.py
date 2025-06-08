@@ -170,6 +170,7 @@ class ServiceBlock(Rfc1035NamedBlockWithComponent):
 
 class IngressPathMixin(BaseModel):
     service: str | None = None
+    service_obj: ServiceBlock | None = None
     service_port_name: str = "http"
 
 
@@ -428,11 +429,12 @@ class ChartDefinition(BaseModel):
 
     def _render_ingresses(self, env: Environment):
         """Render the ingress helm templates."""
-        service_names = self.get_service_names()
         ingress_count = len(self.ingresses)
         for ingress in self.ingresses:
             # Verify the ingress matches a service.
-            if ingress.service not in service_names:
+            try:
+                ingress.service_obj = self.get_service_by_name(ingress.service)
+            except ValueError:
                 raise ValueError(
                     f"Ingress is not associated with a known Service: {ingress.name}"
                 )
@@ -577,6 +579,20 @@ class ChartDefinition(BaseModel):
         Returns the list of service names.
         """
         return [s.name for s in self.services]
+
+    def get_service_by_name(self, name: str) -> ServiceBlock:
+        """
+        Returns the named service, or raises a `ValueError` if no service
+        exists with the given name.
+
+        :param str name: The name of the service to return.
+        :raises: ValueError
+        :rtype: ServiceBlock
+        """
+        for service in self.services:
+            if service.name == name:
+                return service
+        raise ValueError(f"No service exists with name: {name}")
 
     @property
     def chart_root_dir(self) -> Path:

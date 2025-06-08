@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ template "[[ chart.chart_name ]].[[ ingress.service ]].fullname" . }}
+  name: {{ template "[[ chart.chart_name ]].[[ ingress.service_obj.values_section_name ]].fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: [[ ingress.service ]]
@@ -27,7 +27,7 @@ spec:
           {{- end }}
           - path: {{ .Values.ingress.[[ ingress.values_section_name ]].path }}
             pathType: {{ .Values.ingress.[[ ingress.values_section_name ]].pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service ]].fullname" .) "servicePort" "[[ ingress.service_port_name ]]" "context" $)  | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service_obj.values_section_name ]].fullname" .) "servicePort" "[[ ingress.service_port_name ]]" "context" $)  | nindent 14 }}
     {{- end }}
     {{- range .Values.ingress.[[ ingress.values_section_name ]].extraHosts }}
     - host: {{ .name | quote }}
@@ -35,7 +35,7 @@ spec:
         paths:
           - path: {{ default "/" .path }}
             pathType: {{ default "ImplementationSpecific" .pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service ]].fullname" $) "servicePort" "[[ ingress.service_port_name ]]" "context" $) | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "[[ chart.chart_name ]].[[ ingress.service_obj.values_section_name ]].fullname" $) "servicePort" "[[ ingress.service_port_name ]]" "context" $) | nindent 14 }}
     {{- end }}
     {{- if .Values.ingress.[[ ingress.values_section_name ]].extraRules }}
     {{- include "common.tplvalues.render" (dict "value" .Values.ingress.[[ ingress.values_section_name ]].extraRules "context" $) | nindent 4 }}
