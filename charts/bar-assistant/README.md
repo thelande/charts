@@ -1,6 +1,6 @@
 # bar-assistant
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 5.3.0](https://img.shields.io/badge/AppVersion-5.3.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 5.5.1](https://img.shields.io/badge/AppVersion-5.5.1-informational?style=flat-square)
 
 Bar assistant is a self hosted application for managing your home bar.
 
@@ -34,7 +34,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | barAssistant.args | list | `[]` | Override default barAssistant container args (useful when using custom images) |
 | barAssistant.automountServiceAccountToken | bool | `false` | Mount Service Account token in barAssistant pods |
 | barAssistant.command | list | `[]` | Override default barAssistant container command (useful when using custom images) |
-| barAssistant.containerPorts | list | `[{"containerPort":8080,"name":"http"}]` | List of ports for barAssistant containers |
+| barAssistant.containerPorts | list | `[{"containerPort":8080,"name":"http","protocol":"TCP"}]` | List of ports for barAssistant containers |
 | barAssistant.containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Set allowPrivilegeEscalation in barAssistant container' Security Context |
 | barAssistant.containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | List of capabilities to be dropped in barAssistant container |
 | barAssistant.containerSecurityContext.enabled | bool | `true` | Enabled barAssistant container' Security Context |
@@ -58,7 +58,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | barAssistant.image.pullSecrets | list | `[]` | Image pull secrets Secrets must be manually created in the namespace. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | barAssistant.image.registry | string | `"docker.io"` | barAssistant image registry |
 | barAssistant.image.repository | string | `"barassistant/server"` | barAssistant image repository |
-| barAssistant.image.tag | string | `"5.3.0"` | barAssistant image tag |
+| barAssistant.image.tag | string | `"5.5.1"` | barAssistant image tag |
 | barAssistant.initContainers | list | `[]` | Add additional init containers to the barAssistant pods ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | barAssistant.livenessProbe.enabled | bool | `true` | Enable livenessProbe on barAssistant containers |
 | barAssistant.livenessProbe.failureThreshold | int | `3` | Failure threshold for livenessProbe |
@@ -153,7 +153,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | meili.args | list | `[]` | Override default meili container args (useful when using custom images) |
 | meili.automountServiceAccountToken | bool | `false` | Mount Service Account token in meili pods |
 | meili.command | list | `[]` | Override default meili container command (useful when using custom images) |
-| meili.containerPorts | list | `[{"containerPort":7700,"name":"http"}]` | List of ports for meili containers |
+| meili.containerPorts | list | `[{"containerPort":7700,"name":"http","protocol":"TCP"}]` | List of ports for meili containers |
 | meili.containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Set allowPrivilegeEscalation in meili container' Security Context |
 | meili.containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | List of capabilities to be dropped in meili container |
 | meili.containerSecurityContext.enabled | bool | `true` | Enabled meili container' Security Context |
@@ -177,7 +177,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | meili.image.pullSecrets | list | `[]` | Image pull secrets Secrets must be manually created in the namespace. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | meili.image.registry | string | `"docker.io"` | meili image registry |
 | meili.image.repository | string | `"getmeili/meilisearch"` | meili image repository |
-| meili.image.tag | string | `"v1.14"` | meili image tag |
+| meili.image.tag | string | `"v1.15"` | meili image tag |
 | meili.initContainers | list | `[]` | Add additional init containers to the meili pods ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | meili.livenessProbe.enabled | bool | `true` | Enable livenessProbe on meili containers |
 | meili.livenessProbe.failureThreshold | int | `3` | Failure threshold for livenessProbe |
@@ -225,6 +225,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | meili.updateStrategy | object | `{"type":"RollingUpdate"}` | Deployment strategy type ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | meiliMasterKeySecret.existingSecret | string | `""` |  |
 | meiliMasterKeySecret.value | string | `""` |  |
+| metrics.enabled | bool | `false` |  |
 | nameOverride | string | `""` | String to partially override common.names.name |
 | namespaceOverride | string | `""` | String to fully override common.names.namespace |
 | oauth.baseUrl | string | `""` | The base URL of the OAuth host. |
@@ -260,7 +261,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | saltRim.args | list | `[]` | Override default saltRim container args (useful when using custom images) |
 | saltRim.automountServiceAccountToken | bool | `false` | Mount Service Account token in saltRim pods |
 | saltRim.command | list | `[]` | Override default saltRim container command (useful when using custom images) |
-| saltRim.containerPorts | list | `[{"containerPort":8080,"name":"http"}]` | List of ports for saltRim containers |
+| saltRim.containerPorts | list | `[{"containerPort":8080,"name":"http","protocol":"TCP"}]` | List of ports for saltRim containers |
 | saltRim.containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Set allowPrivilegeEscalation in saltRim container' Security Context |
 | saltRim.containerSecurityContext.capabilities | object | `{"drop":["ALL"]}` | List of capabilities to be dropped in saltRim container |
 | saltRim.containerSecurityContext.enabled | bool | `true` | Enabled saltRim container' Security Context |

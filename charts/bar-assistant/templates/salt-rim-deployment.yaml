@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ template "bar-assistant.salt-rim.fullname" . }}
+  name: {{ template "bar-assistant.saltRim.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: salt-rim
@@ -72,7 +72,7 @@ spec:
       {{- end }}
       containers:
         - name: salt-rim
-          image: {{ template "bar-assistant.salt-rim.image" . }}
+          image: {{ template "bar-assistant.saltRim.image" . }}
           imagePullPolicy: {{ .Values.saltRim.image.pullPolicy }}
           {{- if .Values.saltRim.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.saltRim.containerSecurityContext "context" $) | nindent 12 }}

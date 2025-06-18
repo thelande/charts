@@ -4,9 +4,9 @@ SPDX-License-Identifier: APACHE-2.0
 */}}
 
 {{/*
-Return the proper bar-assistant name
+Return the proper barAssistant name
 */}}
-{{- define "bar-assistant.bar-assistant.fullname" -}}
+{{- define "bar-assistant.barAssistant.fullname" -}}
 {{ printf "%s-bar-assistant" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
@@ -18,16 +18,16 @@ Return the proper meili name
 {{- end -}}
 
 {{/*
-Return the proper salt-rim name
+Return the proper saltRim name
 */}}
-{{- define "bar-assistant.salt-rim.fullname" -}}
+{{- define "bar-assistant.saltRim.fullname" -}}
 {{ printf "%s-salt-rim" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{/*
-Return the proper bar-assistant image name
+Return the proper barAssistant image name
 */}}
-{{- define "bar-assistant.bar-assistant.image" -}}
+{{- define "bar-assistant.barAssistant.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.barAssistant.image "global" .Values.global) }}
 {{- end -}}
 
@@ -39,16 +39,16 @@ Return the proper meili image name
 {{- end -}}
 
 {{/*
-Return the proper salt-rim image name
+Return the proper saltRim image name
 */}}
-{{- define "bar-assistant.salt-rim.image" -}}
+{{- define "bar-assistant.saltRim.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.saltRim.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "bar-assistant.bar-assistant.volumePermissions.image" -}}
+{{- define "bar-assistant.barAssistant.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.barAssistant.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 

@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
 kind: StatefulSet
 metadata:
-  name: {{ template "bar-assistant.bar-assistant.fullname" . }}
+  name: {{ template "bar-assistant.barAssistant.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: bar-assistant
@@ -74,7 +74,7 @@ spec:
       {{- end }}
       containers:
         - name: bar-assistant
-          image: {{ template "bar-assistant.bar-assistant.image" . }}
+          image: {{ template "bar-assistant.barAssistant.image" . }}
           imagePullPolicy: {{ .Values.barAssistant.image.pullPolicy }}
           {{- if .Values.barAssistant.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.barAssistant.containerSecurityContext "context" $) | nindent 12 }}

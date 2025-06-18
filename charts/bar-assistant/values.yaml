@@ -61,7 +61,7 @@ barAssistant:
     # -- barAssistant image repository
     repository: barassistant/server
     # -- barAssistant image tag
-    tag: 5.3.0
+    tag: 5.5.1
     # -- The image pull policy
     # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     pullPolicy: IfNotPresent
@@ -81,6 +81,7 @@ barAssistant:
   containerPorts:
     - name: http
       containerPort: 8080
+      protocol: TCP
   ## e.g:
   ## containerPorts:
   ##   - name: myservice
@@ -371,7 +372,7 @@ meili:
     # -- meili image repository
     repository: getmeili/meilisearch
     # -- meili image tag
-    tag: v1.14
+    tag: v1.15
     # -- The image pull policy
     # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     pullPolicy: IfNotPresent
@@ -391,6 +392,7 @@ meili:
   containerPorts:
     - name: http
       containerPort: 7700
+      protocol: TCP
   ## e.g:
   ## containerPorts:
   ##   - name: myservice
@@ -637,6 +639,7 @@ saltRim:
   containerPorts:
     - name: http
       containerPort: 8080
+      protocol: TCP
   ## e.g:
   ## containerPorts:
   ##   - name: myservice
@@ -1279,11 +1282,11 @@ serviceAccount:
   automountServiceAccountToken: true
   
 
-
 ## Secrets
 meiliMasterKeySecret:
   value: ""
   existingSecret: ""
+
 
 smtp:
   # -- Enable configuration of the SMTP secret
@@ -1327,6 +1330,9 @@ oauth:
     # -- Existing secret containing the client ID and secret (keys should be clientID and clientSecret)
     existingSecret: ""
 
+
+metrics:
+  enabled: false
 ## Subchart configuration
 redis:
   enabled: false

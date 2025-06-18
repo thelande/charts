@@ -1,5 +1,5 @@
 chart_name: bar-assistant
-app_version: 5.3.0
+app_version: 5.5.1
 description: Bar assistant is a self hosted application for managing your home bar.
 category: Recipe Creation
 homepage: https://bar-assistant.app
@@ -20,7 +20,7 @@ components:
     persistence: true
     image:
       repository: barassistant/server
-      tag: '5.3.0'
+      tag: '5.5.1'
     ports:
       - name: http
         port: 8080
@@ -86,7 +86,7 @@ components:
     type: deployment
     image:
       repository: getmeili/meilisearch
-      tag: 'v1.14'
+      tag: 'v1.15'
     ports:
       - name: http
         port: 7700

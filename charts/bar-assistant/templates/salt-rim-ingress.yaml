@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ template "bar-assistant.salt-rim.fullname" . }}
+  name: {{ template "bar-assistant.saltRim.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: salt-rim
@@ -27,7 +27,7 @@ spec:
           {{- end }}
           - path: {{ .Values.ingress.saltRim.path }}
             pathType: {{ .Values.ingress.saltRim.pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.salt-rim.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.saltRim.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
     {{- end }}
     {{- range .Values.ingress.saltRim.extraHosts }}
     - host: {{ .name | quote }}
@@ -35,7 +35,7 @@ spec:
         paths:
           - path: {{ default "/" .path }}
             pathType: {{ default "ImplementationSpecific" .pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.salt-rim.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.saltRim.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
     {{- end }}
     {{- if .Values.ingress.saltRim.extraRules }}
     {{- include "common.tplvalues.render" (dict "value" .Values.ingress.saltRim.extraRules "context" $) | nindent 4 }}

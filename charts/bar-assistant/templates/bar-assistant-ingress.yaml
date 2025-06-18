@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ template "bar-assistant.bar-assistant.fullname" . }}
+  name: {{ template "bar-assistant.barAssistant.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: bar-assistant
@@ -27,7 +27,7 @@ spec:
           {{- end }}
           - path: {{ .Values.ingress.barAssistant.path }}
             pathType: {{ .Values.ingress.barAssistant.pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.bar-assistant.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.barAssistant.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
     {{- end }}
     {{- range .Values.ingress.barAssistant.extraHosts }}
     - host: {{ .name | quote }}
@@ -35,7 +35,7 @@ spec:
         paths:
           - path: {{ default "/" .path }}
             pathType: {{ default "ImplementationSpecific" .pathType }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.bar-assistant.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "bar-assistant.barAssistant.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
     {{- end }}
     {{- if .Values.ingress.barAssistant.extraRules }}
     {{- include "common.tplvalues.render" (dict "value" .Values.ingress.barAssistant.extraRules "context" $) | nindent 4 }}
