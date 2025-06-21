@@ -27,6 +27,37 @@ entries:
       category: Recipe Creation
       licenses: Apache-2.0
     apiVersion: v2
+    appVersion: 5.5.1
+    created: "2025-06-21T00:57:53.207032156Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.13.x
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Bar assistant is a self hosted application for managing your home
+      bar.
+    digest: 5128a9d1b58bbbf72f14c3ad2c215936bb90af138edb03580f40af19d43ccb61
+    home: https://bar-assistant.app
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/bar-assistant.png
+    maintainers:
+    - name: Tom Helander
+      url: https://github.com/thelande/charts
+    name: bar-assistant
+    sources:
+    - https://github.com/thelande/charts/tree/main/charts/bar-assistant
+    - https://github.com/karlomikus/bar-assistant
+    urls:
+    - https://github.com/thelande/charts/releases/download/bar-assistant-0.2.0/bar-assistant-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
+      category: Recipe Creation
+      licenses: Apache-2.0
+    apiVersion: v2
     appVersion: 5.3.0
     created: "2025-05-14T04:14:20.745719994Z"
     dependencies:
@@ -258,6 +289,26 @@ entries:
     - https://github.com/thelande/charts/releases/download/local-path-provisioner-0.0.29/local-path-provisioner-0.0.29.tgz
     version: 0.0.29
   mealie:
+  - apiVersion: v2
+    appVersion: v2.8.0
+    created: "2025-06-21T00:57:53.346341251Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 2.x.x
+    description: 'A self-hosted recipe manager and meal planner with a RestAPI backend
+      and a reactive frontend application built in Vue for a pleasant user experience
+      for the whole family. '
+    digest: 6fe3f5e4b18c495fd94683d7ba910773cf489d26ad74d36aa1ab41b499559a47
+    home: https://mealie.io/
+    name: mealie
+    sources:
+    - https://github.com/mealie-recipes/mealie/
+    - https://github.com/thelande/charts/
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/mealie-0.2.2/mealie-0.2.2.tgz
+    version: 0.2.2
   - apiVersion: v2
     appVersion: v2.8.0
     created: "2025-04-27T23:40:33.985870775Z"
@@ -884,4 +935,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-14T18:19:29.404103453Z"
+generated: "2025-06-21T00:57:53.346487194Z"
