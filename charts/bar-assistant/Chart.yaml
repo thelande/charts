@@ -26,4 +26,4 @@ name: bar-assistant
 sources:
   - https://github.com/thelande/charts/tree/main/charts/bar-assistant
   - https://github.com/karlomikus/bar-assistant
-version: 0.2.0
+version: 0.1.0

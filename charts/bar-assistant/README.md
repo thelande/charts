@@ -1,6 +1,6 @@
 # bar-assistant
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 5.5.1](https://img.shields.io/badge/AppVersion-5.5.1-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 5.5.1](https://img.shields.io/badge/AppVersion-5.5.1-informational?style=flat-square)
 
 Bar assistant is a self hosted application for managing your home bar.
 
@@ -128,6 +128,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | ingress.barAssistant.extraTls | list | `[]` | TLS configuration for additional hostname(s) to be covered with this ingress record ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | ingress.barAssistant.hostname | string | `"bar-assistant.local"` | Default host for the ingress record |
 | ingress.barAssistant.ingressClassName | string | `""` | IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+) This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster . ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/ |
+| ingress.barAssistant.labels | object | `{}` | Additional labels for the Ingress resource. |
 | ingress.barAssistant.path | string | `"/bar(/|$)(.*)"` | Default path for the ingress record NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers |
 | ingress.barAssistant.pathType | string | `"ImplementationSpecific"` | Ingress path type |
 | ingress.barAssistant.secrets | list | `[]` | Custom TLS certificates as secrets NOTE: 'key' and 'certificate' are expected in PEM format NOTE: 'name' should line up with a 'secretName' set further up |
@@ -142,6 +143,7 @@ Bar assistant is a self hosted application for managing your home bar.
 | ingress.saltRim.extraTls | list | `[]` | TLS configuration for additional hostname(s) to be covered with this ingress record ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | ingress.saltRim.hostname | string | `"salt-rim.local"` | Default host for the ingress record |
 | ingress.saltRim.ingressClassName | string | `""` | IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+) This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster . ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/ |
+| ingress.saltRim.labels | object | `{}` | Additional labels for the Ingress resource. |
 | ingress.saltRim.path | string | `"/"` | Default path for the ingress record NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers |
 | ingress.saltRim.pathType | string | `"Prefix"` | Ingress path type |
 | ingress.saltRim.secrets | list | `[]` | Custom TLS certificates as secrets NOTE: 'key' and 'certificate' are expected in PEM format NOTE: 'name' should line up with a 'secretName' set further up |

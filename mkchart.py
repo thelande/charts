@@ -183,6 +183,7 @@ class PathBlock(BaseModel):
 class IngressBlock(Rfc1035NamedBlock, IngressPathMixin):
     path: str = "/"
     path_type: str = "ImplementationSpecific"
+    labels: Annotated[dict[str, str], Field(default_factory=dict)]
     annotations: Annotated[dict[str, str], Field(default_factory=dict)]
     extra_paths: Annotated[list[PathBlock], Field(default_factory=list)]
 
