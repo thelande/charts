@@ -5,6 +5,9 @@ metadata:
   name: {{ include "mealie.fullname" . }}
   labels:
     {{- include "mealie.labels" . | nindent 4 }}
+    {{- with .Values.ingress.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
