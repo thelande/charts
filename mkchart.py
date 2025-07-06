@@ -96,7 +96,7 @@ class EnvBlock(NamedBlock):
     @model_validator(mode="after")
     def validate_value(self) -> Self:
         if self.value is None and self.value_from is None:
-            raise ValidationError("Either value or value_from must be set.")
+            raise ValueError("Either value or value_from must be set.")
         return self
 
     def valuefrom_to_yaml(self):
@@ -146,7 +146,7 @@ class ComponentBlock(Rfc1035NamedBlock):
     def check_persistence(self) -> Self:
         """Only StatefulSets can use the persistence flag."""
         if self.type != ComponentType.STATEFULSET and self.persistence is not None:
-            raise ValidationError("persistence cannot be set for non-statefulsets")
+            raise ValueError("persistence cannot be set for non-statefulsets")
         return self
 
 
