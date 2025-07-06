@@ -108,6 +108,10 @@ class ProbeHttpGet(BaseModel):
     port: str | int = "http"
 
 
+class ProbeCommand(BaseModel):
+    command: list[str]
+
+
 class ProbeBlock(BaseModel):
     enabled: bool = True
     initial_delay_seconds: int = 0
@@ -117,7 +121,18 @@ class ProbeBlock(BaseModel):
     success_threshold: int = 1
 
     # Probe definitions
-    http_probe: ProbeHttpGet = ProbeHttpGet()
+    http_probe: ProbeHttpGet | None = ProbeHttpGet()
+
+
+class LivenessProbeBlock(ProbeBlock):
+    command_probe: ProbeCommand | None = None
+
+    @model_validator(mode="after")
+    def set_default(self) -> Self:
+        """Ensure either http_probe or command_probe is set."""
+        if self.enabled and not self.http_probe and not self.command_probe:
+            raise ValueError("Either http_probe or command_probe must be defined.")
+        return self
 
 
 class ComponentBlock(Rfc1035NamedBlock):
@@ -134,7 +149,9 @@ class ComponentBlock(Rfc1035NamedBlock):
     command: Annotated[list[str], Field(default_factory=list)]
     args: Annotated[list[str], Field(default_factory=list)]
 
-    liveness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
+    liveness_probe: Annotated[
+        LivenessProbeBlock, Field(default_factory=lambda: LivenessProbeBlock())
+    ]
     readiness_probe: Annotated[ProbeBlock, Field(default_factory=lambda: ProbeBlock())]
     startup_probe: Annotated[
         ProbeBlock, Field(default_factory=lambda: ProbeBlock(enabled=False))
