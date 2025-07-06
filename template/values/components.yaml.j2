@@ -6,7 +6,7 @@
     # -- {{ component.values_section_name }} image repository
     repository: {{ component.image.repository }}
     # -- {{ component.values_section_name }} image tag
-    tag: {{ component.image.tag }}
+    tag: '{{ component.image.tag }}'
     # -- The image pull policy
     # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     pullPolicy: IfNotPresent
