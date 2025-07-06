@@ -151,9 +151,11 @@ spec:
             - name: [[ pvc.name ]]
               mountPath: [[ pvc.mount_path ]]
           {%- endfor %}
+          {%- if component.tmpdir_enabled %}
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
+          {%- endif %}
           {{- if .Values.[[ component.values_section_name ]].extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.[[ component.values_section_name ]].extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -161,8 +163,10 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.[[ component.values_section_name ]].sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
+        {%- if component.tmpdir_enabled %}
         - name: empty-dir
           emptyDir: {}
+        {%- endif %}
         {%- if pvcs %}
         {{- if not .Values.[[ component.values_section_name ]].persistence.enabled }}
         {%- for pvc in pvcs %}

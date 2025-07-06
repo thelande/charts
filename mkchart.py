@@ -140,6 +140,8 @@ class ComponentBlock(Rfc1035NamedBlock):
         ProbeBlock, Field(default_factory=lambda: ProbeBlock(enabled=False))
     ]
 
+    tmpdir_enabled: bool = True
+
     @model_validator(mode="after")
     def check_persistence(self) -> Self:
         """Only StatefulSets can use the persistence flag."""
