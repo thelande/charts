@@ -220,7 +220,7 @@ class PersistenceBlock(Rfc1035NamedBlockWithComponent):
 
 
 class SecretBlock(Rfc1035NamedBlockWithComponent):
-    secret_keys: list[Rfc1035NamedBlock]
+    secret_keys: list[NamedBlock]
 
 
 class ConfigMapBlock(Rfc1035NamedBlockWithComponent):
