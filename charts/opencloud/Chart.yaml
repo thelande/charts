@@ -22,4 +22,4 @@ name: opencloud
 sources:
   - https://github.com/thelande/charts/tree/main/charts/opencloud
   - https://github.com/opencloud-eu/opencloud
-version: 0.1.2
+version: 0.1.3

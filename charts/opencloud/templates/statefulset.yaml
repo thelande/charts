@@ -85,13 +85,15 @@ spec:
             - "-c"
             - |
               cp -v /config/* /etc/opencloud
-              chown -R 1000:1000 /etc/opencloud
+              chown -R 1000:1000 /etc/opencloud /var/lib/opencloud
           volumeMounts:
             - name: oc-config-map
               mountPath: /config
               readOnly: true
             - name: opencloud-config
               mountPath: /etc/opencloud
+            - name: opencloud-data
+              mountPath: /var/lib/opencloud
 
       {{- with .Values.opencloud.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
