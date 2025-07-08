@@ -1,0 +1,21 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+{{- if .Values.smtp.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-smtp
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  SMTP_HOST: {{ .Values.smtp.host | quote }}
+  SMTP_PORT: {{ .Values.smtp.port | quote }}
+  SMTP_SECURE: {{ .Values.smtp.secure | quote }}
+  SMTP_FROM_NAME: {{ .Values.smtp.from.name | quote }}
+  SMTP_FROM_ADDRESS: {{ .Values.smtp.from.address | quote }}
+{{- end }}

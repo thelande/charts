@@ -1,0 +1,291 @@
+chart_name: opencloud
+app_version: 3.1.0
+description: >-
+  Excellent file management and collaboration for public authorities,
+  providers and business - or anyone who values ease of use and digital sovereignty.
+
+category: Office
+app_source: https://github.com/opencloud-eu/opencloud
+homepage: https://opencloud.eu/
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/opencloud.png
+
+smtp: true
+oauth: true
+
+components:
+  # - name: clamav
+  #   # values_section_name: ""
+  #   image:
+  #     repository: clamav/clamav
+  #     tag: '1.4'
+  #   type: deployment
+  #   ports: []
+  #   # env: []
+  #   # persistence: false
+
+  #   # command: []
+  #   # args: []
+
+  #   liveness_probe:
+  #     enabled: false
+  #     # initial_delay_seconds: 10
+  #     # period_seconds: 10
+  #     # timeout_seconds: 1
+  #     # failure_threshold: 3
+  #     # success_threshold: 1
+
+  #   readiness_probe:
+  #     enabled: false
+  #   # startup_probe: {}
+
+  #   tmpdir_enabled: false
+
+  - name: opencloud
+    image:
+      repository: opencloudeu/opencloud
+      tag: latest
+    type: statefulset
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "opencloud init || true; opencloud server"
+    ports:
+      - name: http
+        port: 9200
+      # The REVA/gRPC gateway
+      - name: reva-gateway
+        port: 9152
+      # The registry
+      - name: registry
+        port: 9233
+    env:
+      - name: START_ADDITIONAL_SERVICES
+        value: 'notifications'
+      - name: OC_LOG_LEVEL
+        value: '{{ default "info" .Values.opencloud.logLevel }}'
+      - name: OC_LOG_COLOR
+        value: '{{ default "false" .Values.opencloud.logPretty }}'
+      - name: OC_LOG_PRETTY
+        value: '{{ default "false" .Values.opencloud.logPretty }}'
+      - name: OC_URL
+        value: '{{ default "http://opencloud.local" .Values.opencloud.externalUrl }}'
+      - name: PROXY_TLS
+        value: "false"
+      - name: GATEWAY_GRPC_ADDR
+        value: '0.0.0.0:9142'
+      - name: OC_INSECURE
+        value: "false"
+      - name: PROXY_ENABLE_BASIC_AUTH
+        value: '{{ default "false" .Values.opencloud.proxyEnableBasicAuth }}'
+      - name: IDM_ADMIN_PASSWORD
+        value_from:
+          secretKeyRef:
+            name: 'opencloud-idm-admin'
+            key: 'password'
+      - name: FRONTEND_ARCHIVER_MAX_SIZE
+        value: "10000000000"
+      - name: MICRO_REGISTRY_ADDRESS
+        value: 127.0.0.1:9233
+      - name: NATS_NATS_HOST
+        value: 0.0.0.0
+      - name: NATS_NATS_PORT
+        value: '9233'
+      - name: PROXY_CSP_CONFIG_FILE_LOCATION
+        value: /etc/opencloud/csp.yaml
+      - name: OC_PASSWORD_POLICY_BANNED_PASSWORDS_LIST
+        value: banned-password-list.txt
+    persistence: true
+
+    liveness_probe:
+      # enabled: true
+      # initial_delay_seconds: 10
+      period_seconds: 60
+      # timeout_seconds: 1
+      # failure_threshold: 3
+      # success_threshold: 1
+
+    readiness_probe:
+      # enabled: true
+      # initial_delay_seconds: 10
+      period_seconds: 60
+      # timeout_seconds: 1
+      # failure_threshold: 3
+      # success_threshold: 1
+
+services:
+  - name: opencloud
+    # values_section_name: opencloud
+    # component: opencloud
+    ports:
+      - name: http
+        port: 9200
+      - name: reva-gateway
+        port: 9152
+
+ingresses:
+  - name: opencloud
+    # values_section_name: opencloud
+    # component: opencloud
+
+persistence:
+  # - name: clamav-socket
+  #   values_section_name: clamavSocket
+  #   component: clamav
+  #   mount_path: /tmp
+  
+  # - name: clamav-db
+  #   values_section_name: clamavDb
+  #   component: clamav
+  #   mount_path: /var/lib/clamav
+
+  - name: opencloud-config
+    values_section_name: opencloudConfig
+    component: opencloud
+    mount_path: /etc/opencloud
+
+  - name: opencloud-data
+    values_section_name: opencloudData
+    component: opencloud
+    mount_path: /var/lib/opencloud
+
+configmaps:
+  - name: opencloud-conf
+    values_section_name: opencloudConf
+    component: opencloud
+    contents:
+      app-registry.yaml: |
+        app_registry:
+          mimetypes:
+          - mime_type: application/pdf
+            extension: pdf
+            name: PDF
+            description: PDF document
+            icon: ''
+            default_app: ''
+            allow_creation: false
+          - mime_type: application/vnd.oasis.opendocument.text
+            extension: odt
+            name: OpenDocument
+            description: OpenDocument text document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.oasis.opendocument.spreadsheet
+            extension: ods
+            name: OpenSpreadsheet
+            description: OpenDocument spreadsheet document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.oasis.opendocument.presentation
+            extension: odp
+            name: OpenPresentation
+            description: OpenDocument presentation document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+            extension: docx
+            name: Microsoft Word
+            description: Microsoft Word document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.openxmlformats-officedocument.wordprocessingml.form
+            extension: docxf
+            name: Form Document
+            description: Form Document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+            extension: xlsx
+            name: Microsoft Excel
+            description: Microsoft Excel document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.openxmlformats-officedocument.presentationml.presentation
+            extension: pptx
+            name: Microsoft PowerPoint
+            description: Microsoft PowerPoint document
+            icon: ''
+            default_app: CollaboraOnline
+            allow_creation: true
+          - mime_type: application/vnd.jupyter
+            extension: ipynb
+            name: Jupyter Notebook
+            description: Jupyter Notebook
+            icon: ''
+            default_app: ''
+            allow_creation: true
+      csp.yaml: |
+        directives:
+          child-src:
+            - '''self'''
+          connect-src:
+            - '''self'''
+            - 'blob:'
+            - 'https://${COMPANION_DOMAIN|companion.opencloud.test}/'
+            - 'wss://${COMPANION_DOMAIN|companion.opencloud.test}/'
+            - 'https://raw.githubusercontent.com/opencloud-eu/awesome-apps/'
+            - 'https://${KEYCLOAK_DOMAIN|keycloak.opencloud.test}/'
+          default-src:
+            - '''none'''
+          font-src:
+            - '''self'''
+          frame-ancestors:
+            - '''self'''
+          frame-src:
+            - '''self'''
+            - 'blob:'
+            - 'https://embed.diagrams.net/'
+            # In contrary to bash and docker the default is given after the | character
+            - 'https://${COLLABORA_DOMAIN|collabora.opencloud.test}/'
+            # This is needed for the external-sites web extension when embedding sites
+            - 'https://docs.opencloud.eu'
+          img-src:
+            - '''self'''
+            - 'data:'
+            - 'blob:'
+            - 'https://raw.githubusercontent.com/opencloud-eu/awesome-apps/'
+            # In contrary to bash and docker the default is given after the | character
+            - 'https://${COLLABORA_DOMAIN|collabora.opencloud.test}/'
+          manifest-src:
+            - '''self'''
+          media-src:
+            - '''self'''
+          object-src:
+            - '''self'''
+            - 'blob:'
+          script-src:
+            - '''self'''
+            - '''unsafe-inline'''
+          style-src:
+            - '''self'''
+            - '''unsafe-inline'''
+      banned-password-list.txt: |
+        password
+        12345678
+        123
+        OpenCloud
+        OpenCloud-1
+
+secrets:
+  - name: opencloud-idm-admin
+    values_section_name: opencloudIDMAdmin
+    component: opencloud
+    secret_keys:
+      - name: password
+
+disabled_templates:
+  - clusterrolebinding
+  - daemonset
+  - extra-list
+  - hpa
+  - networkpolicy
+  - pdb
+  - role
+  - statefulset
+  - tls-secret
+  - vpa

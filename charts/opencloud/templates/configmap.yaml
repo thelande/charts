@@ -1,0 +1,140 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: opencloud
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+{{- if and .Values.oauth.enabled .Values.oauth.proxyConfig }}
+  proxy.yaml: |
+    {{ toYaml .Values.oauth.proxyConfig | nindent 4 }}
+{{- end }}
+  app-registry.yaml: |
+    app_registry:
+      mimetypes:
+      - mime_type: application/pdf
+        extension: pdf
+        name: PDF
+        description: PDF document
+        icon: ''
+        default_app: ''
+        allow_creation: false
+      - mime_type: application/vnd.oasis.opendocument.text
+        extension: odt
+        name: OpenDocument
+        description: OpenDocument text document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.oasis.opendocument.spreadsheet
+        extension: ods
+        name: OpenSpreadsheet
+        description: OpenDocument spreadsheet document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.oasis.opendocument.presentation
+        extension: odp
+        name: OpenPresentation
+        description: OpenDocument presentation document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        extension: docx
+        name: Microsoft Word
+        description: Microsoft Word document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.openxmlformats-officedocument.wordprocessingml.form
+        extension: docxf
+        name: Form Document
+        description: Form Document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        extension: xlsx
+        name: Microsoft Excel
+        description: Microsoft Excel document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.openxmlformats-officedocument.presentationml.presentation
+        extension: pptx
+        name: Microsoft PowerPoint
+        description: Microsoft PowerPoint document
+        icon: ''
+        default_app: CollaboraOnline
+        allow_creation: true
+      - mime_type: application/vnd.jupyter
+        extension: ipynb
+        name: Jupyter Notebook
+        description: Jupyter Notebook
+        icon: ''
+        default_app: ''
+        allow_creation: true
+
+  csp.yaml: |
+    directives:
+      child-src:
+        - '''self'''
+      connect-src:
+        - '''self'''
+        - 'blob:'
+        - 'https://${COMPANION_DOMAIN|companion.opencloud.test}/'
+        - 'wss://${COMPANION_DOMAIN|companion.opencloud.test}/'
+        - 'https://raw.githubusercontent.com/opencloud-eu/awesome-apps/'
+        - 'https://${KEYCLOAK_DOMAIN|keycloak.opencloud.test}/'
+      default-src:
+        - '''none'''
+      font-src:
+        - '''self'''
+      frame-ancestors:
+        - '''self'''
+      frame-src:
+        - '''self'''
+        - 'blob:'
+        - 'https://embed.diagrams.net/'
+        # In contrary to bash and docker the default is given after the | character
+        - 'https://${COLLABORA_DOMAIN|collabora.opencloud.test}/'
+        # This is needed for the external-sites web extension when embedding sites
+        - 'https://docs.opencloud.eu'
+      img-src:
+        - '''self'''
+        - 'data:'
+        - 'blob:'
+        - 'https://raw.githubusercontent.com/opencloud-eu/awesome-apps/'
+        # In contrary to bash and docker the default is given after the | character
+        - 'https://${COLLABORA_DOMAIN|collabora.opencloud.test}/'
+      manifest-src:
+        - '''self'''
+      media-src:
+        - '''self'''
+      object-src:
+        - '''self'''
+        - 'blob:'
+      script-src:
+        - '''self'''
+        - '''unsafe-inline'''
+      style-src:
+        - '''self'''
+        - '''unsafe-inline'''
+
+  banned-password-list.txt: |
+    password
+    12345678
+    123
+    OpenCloud
+    OpenCloud-1
+

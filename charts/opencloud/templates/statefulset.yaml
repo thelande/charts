@@ -1,0 +1,275 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ template "opencloud.opencloud.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: opencloud
+  {{- if or .Values.opencloud.statefulsetAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.opencloud.statefulsetAnnotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.opencloud.replicaCount }}
+  podManagementPolicy: {{ .Values.podManagementPolicy | quote }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.opencloud.podLabels .Values.commonLabels) "context" .) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: opencloud
+  serviceName: {{ template "common.names.fullname" . }}
+  {{- if .Values.opencloud.updateStrategy }}
+  updateStrategy: {{- toYaml .Values.opencloud.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.oauth.enabled }}
+        checksum/config-oauth: {{ include (print $.Template.BasePath "/oauth-configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.smtp.enabled }}
+        checksum/config-smtp: {{ include (print $.Template.BasePath "/smtp-configmap.yaml") . | sha256sum }}
+        {{- end }}
+      {{- if .Values.opencloud.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: opencloud
+    spec:
+      {{- include "opencloud.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ template "opencloud.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.opencloud.automountServiceAccountToken }}
+      {{- if .Values.opencloud.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.opencloud.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.opencloud.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.opencloud.podAffinityPreset "component" "opencloud" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.opencloud.podAntiAffinityPreset "component" "opencloud" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.opencloud.nodeAffinityPreset.type "key" .Values.opencloud.nodeAffinityPreset.key "values" .Values.opencloud.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.opencloud.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.opencloud.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.opencloud.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.opencloud.priorityClassName }}
+      priorityClassName: {{ .Values.opencloud.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.opencloud.schedulerName }}
+      schedulerName: {{ .Values.opencloud.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.opencloud.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.topologySpreadConstraints "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.opencloud.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.opencloud.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.opencloud.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.opencloud.terminationGracePeriodSeconds }}
+      {{- end }}
+      initContainers:
+        - name: config-init
+          image: busybox:latest
+          imagePullPolicy: {{ .Values.opencloud.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+            - "-c"
+            - cp -v /config/* /etc/opencloud
+          volumeMounts:
+            - name: oc-config-map
+              mountPath: /config
+              readOnly: true
+            - name: opencloud-config
+              mountPath: /etc/opencloud
+
+      {{- with .Values.opencloud.initContainers }}
+        {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: opencloud
+          image: {{ template "opencloud.opencloud.image" . }}
+          imagePullPolicy: {{ .Values.opencloud.image.pullPolicy }}
+          {{- if .Values.opencloud.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.opencloud.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.opencloud.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.opencloud.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: START_ADDITIONAL_SERVICES
+              value: "notifications"
+            - name: OC_LOG_LEVEL
+              value: "{{ default "info" .Values.opencloud.logLevel }}"
+            - name: OC_LOG_COLOR
+              value: "{{ default "false" .Values.opencloud.logPretty }}"
+            - name: OC_LOG_PRETTY
+              value: "{{ default "false" .Values.opencloud.logPretty }}"
+            - name: OC_URL
+              value: "{{ default "http://opencloud.local" .Values.opencloud.externalUrl }}"
+            - name: PROXY_TLS
+              value: "false"
+            - name: GATEWAY_GRPC_ADDR
+              value: "0.0.0.0:9142"
+            - name: OC_INSECURE
+              value: "false"
+            - name: PROXY_ENABLE_BASIC_AUTH
+              value: "{{ default "false" .Values.opencloud.proxyEnableBasicAuth }}"
+            - name: IDM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: opencloud-idm-admin
+
+            - name: FRONTEND_ARCHIVER_MAX_SIZE
+              value: "10000000000"
+            - name: MICRO_REGISTRY_ADDRESS
+              value: "127.0.0.1:9233"
+            - name: NATS_NATS_HOST
+              value: "0.0.0.0"
+            - name: NATS_NATS_PORT
+              value: "9233"
+            - name: PROXY_CSP_CONFIG_FILE_LOCATION
+              value: "/etc/opencloud/csp.yaml"
+            - name: OC_PASSWORD_POLICY_BANNED_PASSWORDS_LIST
+              value: "banned-password-list.txt"
+            {{- if .Values.opencloud.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.smtp.enabled }}
+            - configMapRef:
+                name: {{ template "common.names.fullname" . }}-smtp
+            - secretRef:
+                name: {{ include "common.secrets.name" (dict "existingSecret" .Values.smtp.auth.existingSecret "defaultNameSuffix" "-smtp" "context" $) }}
+            {{- end }}
+            {{- if .Values.oauth.enabled }}
+            - configMapRef:
+                name: {{ template "common.names.fullname" . }}-oauth
+            {{- end }}
+            {{- if .Values.opencloud.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.opencloud.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.opencloud.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.opencloud.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.opencloud.resources }}
+          resources: {{- toYaml .Values.opencloud.resources | nindent 12 }}
+          {{- else if ne .Values.opencloud.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.opencloud.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.opencloud.containerPorts }}
+          ports:
+            {{- include "common.tplvalues.render" (dict "value" . "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.opencloud.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.opencloud.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.opencloud.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.opencloud.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.opencloud.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.opencloud.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.opencloud.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.opencloud.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.opencloud.startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.opencloud.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: opencloud-config
+              mountPath: /etc/opencloud
+            - name: opencloud-data
+              mountPath: /var/lib/opencloud
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+          {{- if .Values.opencloud.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.opencloud.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.opencloud.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: oc-config-map
+          configMap:
+            name: {{ template "common.names.fullname" . }}
+        - name: empty-dir
+          emptyDir: {}
+        {{- if not .Values.opencloud.persistence.enabled }}
+        - name: opencloud-config
+          emptyDir: {}
+        - name: opencloud-data
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.opencloud.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.opencloud.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+  {{- if .Values.opencloud.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: opencloud-config
+        {{- if or .Values.persistence.opencloudConfig.annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.opencloudConfig.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.opencloudConfig.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.opencloudConfig.size | quote }}
+        {{- if .Values.persistence.opencloudConfig.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.opencloudConfig.selector "context" $) | nindent 10 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence.opencloudConfig "global" .Values.global) | nindent 8 }}
+    - metadata:
+        name: opencloud-data
+        {{- if or .Values.persistence.opencloudData.annotations .Values.commonAnnotations }}
+        {{- $claimAnnotations := include "common.tplvalues.merge" (dict "values" .Values.persistence.opencloudData.annotations .Values.commonAnnotations "context" .) | fromYaml }}
+        annotations: {{- include "common.tplvalues.render" ( dict "value" $claimAnnotations "context" $ ) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.commonLabels }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.opencloudData.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.opencloudData.size | quote }}
+        {{- if .Values.persistence.opencloudData.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.opencloudData.selector "context" $) | nindent 10 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.persistence.opencloudData "global" .Values.global) | nindent 8 }}
+  {{- end }}

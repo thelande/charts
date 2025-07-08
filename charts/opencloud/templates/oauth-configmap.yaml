@@ -1,0 +1,47 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+{{- if .Values.oauth.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-oauth
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  # SSO config
+  OC_OIDC_ISSUER: '{{ .Values.oauth.baseUrl }}/realms/{{ .Values.oauth.realm }}'
+  WEB_OIDC_CLIENT_ID: {{ .Values.oauth.client.id | quote }}
+  WEB_OPTION_ACCOUNT_EDIT_LINK_HREF: '{{ .Values.oauth.baseUrl }}/realms/{{ .Values.oauth.realm }}/account'
+
+  ## Proxy
+  PROXY_AUTOPROVISION_ACCOUNTS: {{ .Values.oauth.autoprovisionAccounts | quote }}
+  PROXY_ROLE_ASSIGNMENT_DRIVER: 'oidc'
+  PROXY_OIDC_REWRITE_WELLKNOWN: 'true'
+  PROXY_USER_OID_CLAIM: {{ .Values.oauth.userOIDCClaim | quote }}
+  PROXY_USER_CS3_CLAIM: {{ .Values.oauth.userCS3Claim | quote }}
+
+  ## Role assignment
+  {{- if .Values.oauth.autoprovisionAccounts }}
+  PROXY_AUTOPROVISION_CLAIM_USERNAME: {{ .Values.oauth.userOIDCClaim | quote }}
+  OC_EXCLUDE_RUN_SERVICES: 'idp'
+  GRAPH_USERNAME_MATCH: 'none'
+  {{- else }}
+  OC_EXCLUDE_RUN_SERVICES: 'idp,idm'
+  {{- end }}
+  {{- if .Values.oauth.oidcScope }}
+  WEB_OIDC_SCOPE: {{ .Values.oauth.oidcScope | quote }}
+  {{- end }}
+  PROXY_ROLE_ASSIGNMENT_OIDC_CLAIM: {{ .Values.oauth.roleClaim | quote }}
+  GRAPH_ASSIGN_DEFAULT_USER_ROLE: 'false'
+  PROXY_OIDC_ACCESS_TOKEN_VERIFY_METHOD: 'none'
+
+  #OC_ADMIN_USER_ID: ""
+  #SETTINGS_SETUP_DEFAULT_ASSIGNMENTS: 'false'
+  {{- $domain := regexReplaceAll "^[a-zA-Z]+://([^/]+).*$" .Values.oauth.baseUrl "${1}" }}
+  KEYCLOAK_DOMAIN: '{{ $domain }}'
+{{- end }}

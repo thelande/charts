@@ -1,0 +1,57 @@
+{{- /*
+Copyright Thomas Helander. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.ingress.opencloud.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "opencloud.opencloud.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: opencloud
+    {{- with .Values.ingress.opencloud.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.ingress.opencloud.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.ingress.opencloud.annotations .Values.commonAnnotations) "context" .) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.opencloud.ingressClassName | quote }}
+  rules:
+    {{- if .Values.ingress.opencloud.hostname }}
+    - host: {{ .Values.ingress.opencloud.hostname }}
+      http:
+        paths:
+          {{- if .Values.ingress.opencloud.extraPaths }}
+          {{- toYaml .Values.ingress.opencloud.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.ingress.opencloud.path }}
+            pathType: {{ .Values.ingress.opencloud.pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "opencloud.opencloud.fullname" .) "servicePort" "http" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.ingress.opencloud.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "opencloud.opencloud.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.ingress.opencloud.extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.opencloud.extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.ingress.opencloud.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.opencloud.annotations )) .Values.ingress.opencloud.selfSigned)) .Values.ingress.opencloud.extraTls }}
+  tls:
+    {{- if and .Values.ingress.opencloud.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.opencloud.annotations )) .Values.ingress.opencloud.selfSigned) }}
+    - hosts:
+        - {{ .Values.ingress.opencloud.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.ingress.opencloud.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.opencloud.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.opencloud.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
