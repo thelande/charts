@@ -83,7 +83,9 @@ spec:
           command:
             - "/bin/sh"
             - "-c"
-            - cp -v /config/* /etc/opencloud
+            - |
+              cp -v /config/* /etc/opencloud
+              chown -R 1000:1000 /etc/opencloud
           volumeMounts:
             - name: oc-config-map
               mountPath: /config
