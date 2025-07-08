@@ -59,9 +59,9 @@ opencloud:
     # -- opencloud image registry
     registry: docker.io
     # -- opencloud image repository
-    repository: opencloudeu/opencloud
+    repository: opencloudeu/opencloud-rolling
     # -- opencloud image tag
-    tag: 'latest'
+    tag: '3.1.0'
     # -- The image pull policy
     # ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     pullPolicy: IfNotPresent
@@ -185,7 +185,7 @@ opencloud:
     # -- Set filesystem extra groups for opencloud pods
     supplementalGroups: []
     # -- Set fsGroup in opencloud pods' Security Context
-    fsGroup: 1001
+    fsGroup: 1000
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   containerSecurityContext:
@@ -194,8 +194,8 @@ opencloud:
     # -- Set SELinux options in opencloud container
     seLinuxOptions: {}
     # -- Set runAsUser in opencloud container' Security Context
-    runAsUser: 1001
-    runAsGroup: 1001
+    runAsUser: 1000
+    runAsGroup: 1000
     # -- Set runAsNonRoot in opencloud container' Security Context
     runAsNonRoot: true
     # -- Set readOnlyRootFilesystem in opencloud container' Security Context
@@ -643,7 +643,7 @@ smtp:
     # -- An existing secret containing the SMTP server username and password.
     existingSecret: ""
 
-# -- OpenID/OAuth configuration. See
+# OpenID/OAuth configuration. See
 # https://docs.opencloud.eu/docs/admin/configuration/authentication-and-user-management/external-idp/
 # for addition information.
 oauth:

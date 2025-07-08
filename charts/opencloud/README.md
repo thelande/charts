@@ -1,6 +1,6 @@
 # opencloud
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 Excellent file management and collaboration for public authorities, providers and business - or anyone who values ease of use and digital sovereignty.
 
@@ -58,13 +58,18 @@ Excellent file management and collaboration for public authorities, providers an
 | metrics.enabled | bool | `false` |  |
 | nameOverride | string | `""` | String to partially override common.names.name |
 | namespaceOverride | string | `""` | String to fully override common.names.namespace |
+| oauth.autoprovisionAccounts | bool | `true` | When set to true, OpenCloud will create a new user account in the LDAP Database for every user who logs in via OpenID Connect for the first time. Enabling this requires access to a writable LDAP server. For smaller setups this can be the built-in LDAP server provided by the idm service. If set to false all users logging in must already be existing in the LDAP server. (The mapping between the OIDC and LDAP users happens based on the aforementioned userOIDCClaim and userCS3Claim settings. |
 | oauth.baseUrl | string | `""` | The base URL of the OAuth host. |
 | oauth.client.existingSecret | string | `""` | Existing secret containing the client ID and secret (keys should be clientID and clientSecret) |
 | oauth.client.id | string | `""` | The client id of your configured client in your provider |
 | oauth.client.secret | string | `""` | The client secret of your configured client in your provider |
 | oauth.enabled | bool | `false` | Enables authentication via OAuth |
+| oauth.proxyConfig | object | `{}` | The proxy.yaml configuration file. |
 | oauth.realm | string | `""` | The OAuth realm (Keycloak). |
 | oauth.redirectUri | string | `""` | The redirect URI |
+| oauth.roleClaim | string | `"roles"` |  |
+| oauth.userCS3Claim | string | `"username"` |  |
+| oauth.userOIDCClaim | string | `"preferred_username"` | Defines the OIDC claim that OpenCloud uses to uniquely identify a user. It is matched against the OpenCloud user attribute defined in userCS3Claim. |
 | opencloud.affinity | object | `{}` | Affinity for opencloud pods assignment ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity NOTE: `opencloud.podAffinityPreset`, `opencloud.podAntiAffinityPreset`, and `opencloud.nodeAffinityPreset` will be ignored when it's set |
 | opencloud.annotations | object | `{}` | Annotations for opencloud ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | opencloud.args | list | `[]` | Override default opencloud container args (useful when using custom images) |
@@ -76,14 +81,15 @@ Excellent file management and collaboration for public authorities, providers an
 | opencloud.containerSecurityContext.enabled | bool | `true` | Enabled opencloud container' Security Context |
 | opencloud.containerSecurityContext.privileged | bool | `false` | Set privileged in opencloud container' Security Context |
 | opencloud.containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Set readOnlyRootFilesystem in opencloud container' Security Context |
-| opencloud.containerSecurityContext.runAsGroup | int | `1001` |  |
+| opencloud.containerSecurityContext.runAsGroup | int | `1000` |  |
 | opencloud.containerSecurityContext.runAsNonRoot | bool | `true` | Set runAsNonRoot in opencloud container' Security Context |
-| opencloud.containerSecurityContext.runAsUser | int | `1001` | Set runAsUser in opencloud container' Security Context |
+| opencloud.containerSecurityContext.runAsUser | int | `1000` | Set runAsUser in opencloud container' Security Context |
 | opencloud.containerSecurityContext.seLinuxOptions | object | `{}` | Set SELinux options in opencloud container |
 | opencloud.containerSecurityContext.seccompProfile | object | `{"type":"RuntimeDefault"}` | Set seccomp profile in opencloud container |
 | opencloud.customLivenessProbe | object | `{}` | Custom livenessProbe that overrides the default one |
 | opencloud.customReadinessProbe | object | `{}` | Custom readinessProbe that overrides the default one |
 | opencloud.customStartupProbe | object | `{}` | Custom startupProbe that overrides the default one |
+| opencloud.externalUrl | string | `"http://opencloud.local"` |  |
 | opencloud.extraEnvVars | list | `[]` | Array with extra environment variables to add to opencloud containers |
 | opencloud.extraEnvVarsCM | string | `""` | Name of existing ConfigMap containing extra env vars for opencloud containers |
 | opencloud.extraEnvVarsSecret | string | `""` | Name of existing Secret containing extra env vars for opencloud containers |
@@ -93,8 +99,8 @@ Excellent file management and collaboration for public authorities, providers an
 | opencloud.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images |
 | opencloud.image.pullSecrets | list | `[]` | Image pull secrets Secrets must be manually created in the namespace. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
 | opencloud.image.registry | string | `"docker.io"` | opencloud image registry |
-| opencloud.image.repository | string | `"opencloudeu/opencloud"` | opencloud image repository |
-| opencloud.image.tag | string | `"latest"` | opencloud image tag |
+| opencloud.image.repository | string | `"opencloudeu/opencloud-rolling"` | opencloud image repository |
+| opencloud.image.tag | string | `"3.1.0"` | opencloud image tag |
 | opencloud.initContainers | list | `[]` | Add additional init containers to the opencloud pods ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | opencloud.livenessProbe.enabled | bool | `true` | Enable livenessProbe on opencloud containers |
 | opencloud.livenessProbe.failureThreshold | int | `3` | Failure threshold for livenessProbe |
@@ -104,6 +110,8 @@ Excellent file management and collaboration for public authorities, providers an
 | opencloud.livenessProbe.periodSeconds | int | `60` | Period seconds for livenessProbe |
 | opencloud.livenessProbe.successThreshold | int | `1` | Success threshold for livenessProbe |
 | opencloud.livenessProbe.timeoutSeconds | int | `1` | Timeout seconds for livenessProbe |
+| opencloud.logLevel | string | `"info"` |  |
+| opencloud.logPretty | bool | `false` |  |
 | opencloud.nodeAffinityPreset.key | string | `""` | Node label key to match. Ignored if `opencloud.affinity` is set |
 | opencloud.nodeAffinityPreset.type | string | `""` | Node affinity preset type. Ignored if `opencloud.affinity` is set. Allowed values: `soft` or `hard` |
 | opencloud.nodeAffinityPreset.values | list | `[]` | Node label values to match. Ignored if `opencloud.affinity` is set |
@@ -115,7 +123,7 @@ Excellent file management and collaboration for public authorities, providers an
 | opencloud.podLabels | object | `{}` | Extra labels for opencloud pods ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | opencloud.podManagementPolicy | string | `"OrderedReady"` | Pod management policy for opencloud statefulset ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies |
 | opencloud.podSecurityContext.enabled | bool | `true` | Enable opencloud pods' Security Context |
-| opencloud.podSecurityContext.fsGroup | int | `1001` | Set fsGroup in opencloud pods' Security Context |
+| opencloud.podSecurityContext.fsGroup | int | `1000` | Set fsGroup in opencloud pods' Security Context |
 | opencloud.podSecurityContext.fsGroupChangePolicy | string | `"Always"` | Set filesystem group change policy for opencloud pods |
 | opencloud.podSecurityContext.supplementalGroups | list | `[]` | Set filesystem extra groups for opencloud pods |
 | opencloud.podSecurityContext.sysctls | list | `[]` | settings using the sysctl interface for opencloud pods |
