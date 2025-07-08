@@ -744,6 +744,34 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/nextcloud-0.1.0/nextcloud-0.1.0.tgz
     version: 0.1.0
+  opencloud:
+  - annotations:
+      category: Office
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.1.0
+    created: "2025-07-08T03:38:47.898646308Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Excellent file management and collaboration for public authorities,
+      providers and business - or anyone who values ease of use and digital sovereignty.
+    digest: 63faa229ef11e0d3cbc0d3668bfa2e3210d6f32c02461f825720e262dc8101b1
+    home: https://opencloud.eu/
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/opencloud.png
+    maintainers:
+    - name: Tom Helander
+      url: https://github.com/thelande/charts
+    name: opencloud
+    sources:
+    - https://github.com/thelande/charts/tree/main/charts/opencloud
+    - https://github.com/opencloud-eu/opencloud
+    urls:
+    - https://github.com/thelande/charts/releases/download/opencloud-0.1.0/opencloud-0.1.0.tgz
+    version: 0.1.0
   openmeteo-exporter:
   - apiVersion: v2
     appVersion: v1.0.3
@@ -935,4 +963,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-21T00:57:53.346487194Z"
+generated: "2025-07-08T03:38:47.898746475Z"
