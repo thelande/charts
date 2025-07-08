@@ -750,6 +750,33 @@ entries:
       licenses: Apache-2.0
     apiVersion: v2
     appVersion: 3.1.0
+    created: "2025-07-08T04:03:11.180314755Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Excellent file management and collaboration for public authorities,
+      providers and business - or anyone who values ease of use and digital sovereignty.
+    digest: ce0780c4ae877eae56524d6c5cc081564d644212db737b392b75bbfa6f212aa7
+    home: https://opencloud.eu/
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/opencloud.png
+    maintainers:
+    - name: Tom Helander
+      url: https://github.com/thelande/charts
+    name: opencloud
+    sources:
+    - https://github.com/thelande/charts/tree/main/charts/opencloud
+    - https://github.com/opencloud-eu/opencloud
+    urls:
+    - https://github.com/thelande/charts/releases/download/opencloud-0.1.1/opencloud-0.1.1.tgz
+    version: 0.1.1
+  - annotations:
+      category: Office
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.1.0
     created: "2025-07-08T03:38:47.898646308Z"
     dependencies:
     - name: common
@@ -963,4 +990,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-08T03:38:47.898746475Z"
+generated: "2025-07-08T04:03:11.180411226Z"
