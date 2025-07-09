@@ -138,7 +138,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: opencloud-idm-admin
+                  name: {{- include "common.secrets.name" (dict "existingSecret" .Values.opencloudIDMAdminSecret.existingSecret "defaultNameSuffix" "-idm-admin" "context" $) }}
 
             - name: FRONTEND_ARCHIVER_MAX_SIZE
               value: "10000000000"
