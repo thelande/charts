@@ -1,6 +1,14 @@
 apiVersion: v2
 name: openmeteo-exporter
-description: A Helm chart for openmeteo-exporter
+description: >-
+  A Prometheus exporter for Open-Meteo, an open-source weather API that offers
+  free access for non-commercial use.
+
+home: https://open-meteo.com/
+
+sources:
+  - https://github.com/thelande/openmeteo_exporter
+  - https://github.com/thelande/charts/tree/main/charts/openmeteo-exporter
 
 # A chart can be either an 'application' or a 'library' chart.
 #
