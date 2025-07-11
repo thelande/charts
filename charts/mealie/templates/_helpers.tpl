@@ -216,7 +216,7 @@ Environment variables
   value: {{ .ldap.mailAttribute | quote }}
 {{- end }}{{/* if .ldap.enabled */}}
 
-{{- /* LDAP configuration */}}
+{{- /* OIDC configuration */}}
 {{- if .oidc.enabled }}
 - name: OIDC_AUTH_ENABLED
   value: {{ .oidc.enabled | quote }}
@@ -256,6 +256,8 @@ Environment variables
   value: {{ .oidc.scopesOverride | quote }}
 - name: OIDC_TLS_CACERTFILE
   value: {{ .oidc.tlsCACertFile | quote }}
+- name: ALLOW_PASSWORD_LOGIN
+  value: "false"
 {{- end }}{{/* if .oidc.enabled */}}
 {{- end }}
 {{- end }}
