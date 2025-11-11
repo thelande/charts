@@ -1135,6 +1135,31 @@ entries:
       category: 3D Printing
       licenses: Apache-2.0
     apiVersion: v2
+    appVersion: 2.0.0-rc1
+    created: "2025-11-11T05:13:22.535092271Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 4.4.x
+    description: Prometheus exporter for Prusa3D printers - supports Prusa Link API
+      and Syslog metrics as well as logs from printer.
+    digest: f068a8acc1d8441e746fb7d3174105fd86892137808c161c4621c86b416ec277
+    home: https://prusa3d.com/
+    icon: https://backend.prusa3d.com/cdn-cgi/image/width=750,format=auto,quality=85/wp-content/uploads/prusaresearch-logo-rgb-black-1-800x451.png
+    maintainers:
+    - name: Tom Helander
+      url: https://github.com/thelande/charts
+    name: prusa-exporter
+    sources:
+    - https://github.com/thelande/charts/tree/main/charts/prusa-exporter
+    - https://github.com/pubeldev/prusa_exporter
+    urls:
+    - https://github.com/thelande/charts/releases/download/prusa-exporter-0.2.0/prusa-exporter-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
+      category: 3D Printing
+      licenses: Apache-2.0
+    apiVersion: v2
     appVersion: 2.0.0-alpha2
     created: "2025-05-27T03:41:14.699840804Z"
     dependencies:
@@ -1168,4 +1193,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-19T17:16:41.072438049Z"
+generated: "2025-11-11T05:13:22.535490154Z"
