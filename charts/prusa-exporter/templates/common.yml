@@ -1,0 +1,120 @@
+---
+{{- include "bjw-s.common.loader.init" . }}
+
+{{- define "prusaExporter.hardcodedValues" -}}
+# Set the nameOverride based on the release name if no override has been set
+{{ if not .Values.global.nameOverride }}
+global:
+  nameOverride: "{{ .Release.Name }}"
+{{ end }}
+
+controllers:
+  prusa-exporter:
+    type: deployment
+
+    annotations:
+      reloader.stakater.com/auto: "true"
+
+    pod:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+
+    containers:
+      prusa-exporter:
+        image:
+          repository: {{ index .Values "prusa-exporter" "image" "repository" }}
+          tag: {{ default .Chart.AppVersion (index .Values "prusa-exporter" "image" "tag") }}
+        resources: {{ index .Values "prusa-exporter" "resources" | toYaml | nindent 10 }}
+        args:
+          - '--config.file=/config/prusa.yml'
+          - '--log.level=info'
+          - '--prusalink.scrape-timeout={{ index .Values "prusa-exporter" "prusalinkScrapeTimeout" }}'
+          {{- if (default "" (index .Values "prusa-exporter" "udpIPOverride")) }}
+          - '--udp.ip-override={{ index .Values "prusa-exporter" "udpIPOverride" }}'
+          {{- end }}
+          {{- if index .Values "prusa-exporter" "enabledUDPMetrics" }}
+          - '--udp.gcode-enabled'
+          {{- end }}
+          {{- if index .Values "prusa-exporter" "lokiPushURL" }}
+          - '--loki.push-url={{ index .Values "prusa-exporter" "lokiPushURL" }}'
+          {{- end }}
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /metrics
+                port: &prusalinkPort 10009
+              initialDelaySeconds: 10
+              periodSeconds: 60
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+
+service:
+  prusalink:
+    ports:
+      http:
+        port: *prusalinkPort
+  udp:
+    controller: prusa-exporter
+    primary: false
+    type: LoadBalancer
+    loadBalancerIP: {{ index .Values "prusa-exporter" "udpServiceLoadBalancerIP" }}
+    ports:
+      prusalink:
+        port: 8514
+        protocol: UDP
+
+{{- if (empty (index .Values "prusa-exporter" "printersSecret")) }}
+secrets:
+  printersConfig:
+    enabled: true
+    stringData:
+      prusa.yml: |-
+        printers:
+          {{ index .Values "prusa-exporter" "printers" | toYaml | nindent 10 }}
+{{- end }}
+
+persistence:
+  config:
+    enabled: true
+    type: secret
+    {{- if (empty (index .Values "prusa-exporter" "printersSecret")) }}
+    identifier: printersConfig
+    {{- else }}
+    name: {{ index .Values "prusa-exporter" "printersSecret" }}
+    {{- end }}
+
+serviceMonitor:
+  main:
+    enabled: {{ index .Values "metrics" "enabled" }}
+    service:
+      identifier: prusalink
+    endpoints:
+      - port: http
+        scheme: http
+        path: /metrics/prusalink
+        interval: {{ index .Values "metrics" "prusalink" "interval" }}
+        scrapeTimeout: 60s
+      - port: http
+        scheme: http
+        path: /metrics/udp
+        interval: {{ index .Values "metrics" "udp" "interval" }}
+
+{{- end -}}
+{{- $_ := mergeOverwrite .Values (include "prusaExporter.hardcodedValues" . | fromYaml) -}}
+
+{{/* Render the templates */}}
+{{ include "bjw-s.common.loader.generate" . }}
