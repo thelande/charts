@@ -8,7 +8,7 @@ prusa-exporter:
 
   resources: {}
 
-  ## -- List of printers to scrape.
+  # -- List of printers to scrape.
   printers: []
   ## - name: <your printer name>  # optional, only used for Grafana dashboard
   ##   type: MINI  # MINI / MK35 / MK35S / MK39 / MK39S / MK4 / MK4S / XL / IX / Core One / Core One L
@@ -16,29 +16,29 @@ prusa-exporter:
   ##   username: maker
   ##   password: <password>
 
-  ## -- Existing secret containing the above printers configuration.
+  # -- Existing secret containing the above printers configuration.
   printersSecret: ""
 
   prusalinkScrapeTimeout: 5
 
-  ## -- Preset IP address for the UDP service load balancer.
+  # -- Preset IP address for the UDP service load balancer.
   udpServiceLoadBalancerIP: ""
 
-  ## -- Define the IP of the system where the exporter is running. This ensures
-  ## the correct metrics host is used by the exporter.
+  # -- Define the IP of the system where the exporter is running. This ensures
+  # the correct metrics host is used by the exporter.
   udpIPOverride: ""
 
-  ## -- Enable automatic enabling of UDP metrics.
-  ## Note: When enabled, after starting the exporter your printer will ask to
-  ## "print" a file named "enable_udp_metrics.gcode". Simply start the "print"
-  ## to proceed.
+  # -- Enable automatic enabling of UDP metrics.
+  # Note: When enabled, after starting the exporter your printer will ask to
+  # "print" a file named "enable_udp_metrics.gcode". Simply start the "print"
+  # to proceed.
   enabledUDPMetrics: true
 
-  ## -- URL of your Loki instance. Used to expose the PNG image of the print. (optional)
+  # -- URL of your Loki instance. Used to expose the PNG image of the print. (optional)
   lokiPushURL: ""
 
 metrics:
-  ## -- Enable the service monitor
+  # -- Enable the service monitor
   enabled: false
   prusalink:
     interval: 60s

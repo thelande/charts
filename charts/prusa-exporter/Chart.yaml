@@ -20,4 +20,4 @@ name: prusa-exporter
 sources:
   - https://github.com/thelande/charts/tree/main/charts/prusa-exporter
   - https://github.com/pubeldev/prusa_exporter
-version: 0.2.0
+version: 0.2.1
