@@ -127,6 +127,10 @@ persistence:
 postgres:
   # -- PostgreSQL cluster details secret name
   appSecretName: "postgres-cluster-app"
+  # -- PostgreSQL SSL mode (e.g., "&sslmode=require", "&sslmode=verify-full")
+  sslMode: ""
+  # -- Additional PostgreSQL connection parameters (e.g., "&connect_timeout=10")
+  extraParams: ""
 
 redis:
   # -- Redis cluster URL
@@ -135,10 +139,18 @@ redis:
 docmost:
   # -- docmost externally accessible URL
   appUrl: ""
+  # -- Enable debug mode (default: false)
+  debugMode: false
 
   drawIO:
     # -- Custom draw.io server url.
     url: ""
+
+  oidc:
+    # -- OIDC button text (default: "Sign in with SSO")
+    buttonText: ""
+    # -- Auto-redirect to OIDC when SSO is enforced (default: false)
+    autoRedirect: false
 
   smtp:
     # -- Should SMTP be enabled?
@@ -164,3 +176,68 @@ docmost:
       password: ""
       # -- An existing secret containing the SMTP server username and password.
       existingSecret: ""
+
+    # -- SMTP ignore TLS (default: false)
+    ignoreTls: false
+
+  postmark:
+    # -- Postmark API token (alternative to SMTP)
+    token: ""
+
+  storage:
+    # -- Storage driver (local or s3)
+    driver: ""
+    s3:
+      # -- AWS S3 region
+      region: ""
+      # -- S3 bucket name
+      bucket: ""
+      # -- S3 endpoint URL
+      endpoint: ""
+      # -- S3 public URL
+      url: ""
+      # -- Force path style (true/false)
+      forcePathStyle: ""
+      # -- Existing secret containing AWS credentials (access-key-id, secret-access-key)
+      existingSecret: ""
+      # -- AWS access key ID (if not using existingSecret)
+      accessKeyId: ""
+      # -- AWS secret access key (if not using existingSecret)
+      secretAccessKey: ""
+
+  # -- File upload size limit (e.g., "50mb", "1gb")
+  fileUploadSizeLimit: ""
+  # -- File import size limit (e.g., "200mb")
+  fileImportSizeLimit: ""
+
+  # -- JWT token expiration (default: "90d")
+  jwtTokenExpiresIn: ""
+
+  # -- Database max pool size (default: 10)
+  databaseMaxPool: ""
+
+  # -- Application port (default: 3000)
+  port: ""
+
+  # -- Disable telemetry (default: false)
+  disableTelemetry: false
+
+  # -- PostHog analytics host
+  posthogHost: ""
+
+  # -- PostHog analytics key
+  posthogKey: ""
+
+# -- Additional environment variables (name/value pairs)
+extraEnv: []
+# - name: NODE_TLS_REJECT_UNAUTHORIZED
+#   value: "0"
+# - name: CUSTOM_VAR
+#   value: "custom_value"
+
+# -- Additional environment variables from secrets or configmaps
+extraEnvFrom: []
+# - secretRef:
+#     name: additional-secrets
+# - configMapRef:
+#     name: additional-config

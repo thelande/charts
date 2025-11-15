@@ -38,7 +38,7 @@ spec:
             - bash
             - -c
             - |
-              export DATABASE_URL="postgresql://${PGSQL_DB_USERNAME}:${PGSQL_DB_PASSWORD}@${PGSQL_DB_HOST}/${PGSQL_DB_NAME}?schema=public"
+              export DATABASE_URL="postgresql://${PGSQL_DB_USERNAME}:${PGSQL_DB_PASSWORD}@${PGSQL_DB_HOST}/${PGSQL_DB_NAME}?schema=public{{ .Values.postgres.sslMode }}{{ .Values.postgres.extraParams }}"
               pnpm start
           ports:
             - name: http
@@ -80,6 +80,98 @@ spec:
                   key: appSecret
             - name: REDIS_URL
               value: {{ (required "A redis URL is required" .Values.redis.url) | quote }}
+            {{- if .Values.docmost.debugMode }}
+            - name: DEBUG_MODE
+              value: "true"
+            {{- end }}
+            {{- if .Values.docmost.storage.driver }}
+            - name: STORAGE_DRIVER
+              value: {{ .Values.docmost.storage.driver | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.region }}
+            - name: AWS_S3_REGION
+              value: {{ .Values.docmost.storage.s3.region | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.bucket }}
+            - name: AWS_S3_BUCKET
+              value: {{ .Values.docmost.storage.s3.bucket | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.endpoint }}
+            - name: AWS_S3_ENDPOINT
+              value: {{ .Values.docmost.storage.s3.endpoint | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.url }}
+            - name: AWS_S3_URL
+              value: {{ .Values.docmost.storage.s3.url | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.forcePathStyle }}
+            - name: AWS_S3_FORCE_PATH_STYLE
+              value: {{ .Values.docmost.storage.s3.forcePathStyle | quote }}
+            {{- end }}
+            {{- if .Values.docmost.storage.s3.existingSecret }}
+            - name: AWS_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.docmost.storage.s3.existingSecret }}
+                  key: access-key-id
+            - name: AWS_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.docmost.storage.s3.existingSecret }}
+                  key: secret-access-key
+            {{- else if .Values.docmost.storage.s3.accessKeyId }}
+            - name: AWS_S3_ACCESS_KEY_ID
+              value: {{ .Values.docmost.storage.s3.accessKeyId | quote }}
+            - name: AWS_S3_SECRET_ACCESS_KEY
+              value: {{ .Values.docmost.storage.s3.secretAccessKey | quote }}
+            {{- end }}
+            {{- if .Values.docmost.fileUploadSizeLimit }}
+            - name: FILE_UPLOAD_SIZE_LIMIT
+              value: {{ .Values.docmost.fileUploadSizeLimit | quote }}
+            {{- end }}
+            {{- if .Values.docmost.fileImportSizeLimit }}
+            - name: FILE_IMPORT_SIZE_LIMIT
+              value: {{ .Values.docmost.fileImportSizeLimit | quote }}
+            {{- end }}
+            {{- if .Values.docmost.drawIO.url }}
+            - name: DRAWIO_URL
+              value: {{ .Values.docmost.drawIO.url | quote }}
+            {{- end }}
+            {{- if .Values.docmost.oidc.buttonText }}
+            - name: OIDC_BUTTON_TEXT
+              value: {{ .Values.docmost.oidc.buttonText | quote }}
+            {{- end }}
+            {{- if .Values.docmost.oidc.autoRedirect }}
+            - name: OIDC_AUTO_REDIRECT
+              value: "true"
+            {{- end }}
+            {{- if .Values.docmost.jwtTokenExpiresIn }}
+            - name: JWT_TOKEN_EXPIRES_IN
+              value: {{ .Values.docmost.jwtTokenExpiresIn | quote }}
+            {{- end }}
+            {{- if .Values.docmost.databaseMaxPool }}
+            - name: DATABASE_MAX_POOL
+              value: {{ .Values.docmost.databaseMaxPool | quote }}
+            {{- end }}
+            {{- if .Values.docmost.disableTelemetry }}
+            - name: DISABLE_TELEMETRY
+              value: "true"
+            {{- end }}
+            {{- if .Values.docmost.port }}
+            - name: PORT
+              value: {{ .Values.docmost.port | quote }}
+            {{- end }}
+            {{- if .Values.docmost.posthogHost }}
+            - name: POSTHOG_HOST
+              value: {{ .Values.docmost.posthogHost | quote }}
+            {{- end }}
+            {{- if .Values.docmost.posthogKey }}
+            - name: POSTHOG_KEY
+              value: {{ .Values.docmost.posthogKey | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             {{- if .Values.docmost.smtp.enabled }}
             - name: MAIL_DRIVER
               value: smtp
@@ -89,6 +181,16 @@ spec:
               value: {{ .Values.docmost.smtp.port | quote }}
             - name: SMTP_SECURE
               value: {{ .Values.docmost.smtp.secure | quote }}
+            {{- if .Values.docmost.smtp.ignoreTls }}
+            - name: SMTP_IGNORETLS
+              value: "true"
+            {{- end }}
+            {{- if .Values.docmost.postmark.token }}
+            - name: MAIL_DRIVER
+              value: postmark
+            - name: POSTMARK_TOKEN
+              value: {{ .Values.docmost.postmark.token | quote }}
+            {{- end }}
             - name: MAIL_FROM_ADDRESS
               value: {{ (required "Mail from address is required." .Values.docmost.smtp.mailFrom.address) | quote }}
             - name: MAIL_FROM_NAME
@@ -104,6 +206,10 @@ spec:
                   name: {{ include "docmost.smtp.auth.secretName" . }}
                   key: password
             {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /app/data/storage
