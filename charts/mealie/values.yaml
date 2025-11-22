@@ -152,6 +152,11 @@ timezone: UTC
 mealie:
   # -- Allow user sign-up without token
   allowSignup: false
+  # -- Whether or not to display the username+password input fields.
+  # Keep set to true unless you use OIDC authentication.
+  allowPasswordLogin: true
+  # -- Logging level (e.g. critical, error, warning, info, debug).
+  logLevel: info
   # -- Used for notifications
   baseURL: http://mealie.local
   # -- The default group for users

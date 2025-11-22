@@ -39,6 +39,7 @@ A self-hosted recipe manager and meal planner with a RestAPI backend and a react
 | ingress.tls | list | `[]` |  |
 | livenessProbe.httpGet.path | string | `"/"` |  |
 | livenessProbe.httpGet.port | string | `"http"` |  |
+| mealie.allowPasswordLogin | bool | `true` | Whether or not to display the username+password input fields. Keep set to true unless you use OIDC authentication. |
 | mealie.allowSignup | bool | `false` | Allow user sign-up without token |
 | mealie.baseURL | string | `"http://mealie.local"` | Used for notifications |
 | mealie.dailyScheduleTime | string | `"23:45"` | The time of day to run daily server tasks, in HH:MM format. Use the server's local time, not UTC |
@@ -60,6 +61,7 @@ A self-hosted recipe manager and meal planner with a RestAPI backend and a react
 | mealie.ldap.sslInsecure | bool | `false` | Do not verify server certificate when using secure LDAP |
 | mealie.ldap.url | string | `""` | LDAP server URL (e.g. ldap://ldap.example.com) |
 | mealie.ldap.userFilter | string | `""` | Optional LDAP filter to narrow down eligible users (e.g. (memberOf=cn=mealie_user,dc=example,dc=com)) |
+| mealie.logLevel | string | `"info"` | Logging level (e.g. critical, error, warning, info, debug). |
 | mealie.oidc.adminGroup | string | `""` | If specified, users belonging to this group will be made an admin. For more information see https://docs.mealie.io/documentation/getting-started/authentication/oidc/#groups |
 | mealie.oidc.autoRedirect | bool | `false` | If True, then the login page will be bypassed an you will be sent directly to your Identity Provider. You can still get to the login page by adding ?direct=1 to the login URL |
 | mealie.oidc.client.existingSecret | string | `""` | Existing secret containing the client ID and secret (keys should be clientID and clientSecret) |

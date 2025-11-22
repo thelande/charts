@@ -116,8 +116,12 @@ Environment variables
   value: {{ .enableAPIDocs | quote }}
 - name: ALLOW_SIGNUP
   value: {{ .allowSignup | quote }}
+- name: ALLOW_PASSWORD_LOGIN
+  value: {{ .allowPasswordLogin| quote }}
 - name: DAILY_SCHEDULE_TIME
   value: {{ .dailyScheduleTime | quote }}
+- name: LOG_LEVEL
+  value: {{ .logLevel | quote }}
 
 {{- /* Security configuration */}}
 - name: SECURITY_MAX_LOGIN_ATTEMPTS
@@ -244,8 +248,6 @@ Environment variables
   value: {{ .oidc.providerName | quote }}
 - name: OIDC_REMEMBER_ME
   value: {{ .oidc.rememberMe | quote }}
-- name: OIDC_SIGNING_ALGORITHM
-  value: {{ .oidc.signingAlgorithm | quote }}
 - name: OIDC_USER_CLAIM
   value: {{ .oidc.userClaim | quote }}
 - name: OIDC_NAME_CLAIM
@@ -256,8 +258,6 @@ Environment variables
   value: {{ .oidc.scopesOverride | quote }}
 - name: OIDC_TLS_CACERTFILE
   value: {{ .oidc.tlsCACertFile | quote }}
-- name: ALLOW_PASSWORD_LOGIN
-  value: "false"
 {{- end }}{{/* if .oidc.enabled */}}
 {{- end }}
 {{- end }}
