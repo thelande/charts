@@ -123,6 +123,22 @@ entries:
   docmost:
   - apiVersion: v2
     appVersion: 0.24.0
+    created: "2025-12-13T21:03:24.713908513Z"
+    description: 'Docmost is an open-source collaborative wiki and documentation software.
+      It is an open-source alternative to Confluence and Notion. '
+    digest: c426fdb3c1e7c5b7839830edea5b53b63382ea5b0fe7921d9f6da9ea26389c58
+    home: https://docmost.com/
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/docmost.png
+    name: docmost
+    sources:
+    - https://github.com/docmost/docmost
+    - https://github.com/thelande/charts
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/docmost-0.5.1/docmost-0.5.1.tgz
+    version: 0.5.1
+  - apiVersion: v2
+    appVersion: 0.24.0
     created: "2025-12-13T20:12:08.94127582Z"
     description: 'Docmost is an open-source collaborative wiki and documentation software.
       It is an open-source alternative to Confluence and Notion. '
@@ -319,6 +335,27 @@ entries:
     - https://github.com/thelande/charts/releases/download/local-path-provisioner-0.0.29/local-path-provisioner-0.0.29.tgz
     version: 0.0.29
   mealie:
+  - apiVersion: v2
+    appVersion: v3.7.0
+    created: "2025-12-13T21:03:24.851040072Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 2.x.x
+    description: 'A self-hosted recipe manager and meal planner with a RestAPI backend
+      and a reactive frontend application built in Vue for a pleasant user experience
+      for the whole family. '
+    digest: 459c0d1ba13845d4c1eda3cf2dff31c1ec31cce1e5a5d10a50a1572558d743d5
+    home: https://mealie.io/
+    icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/mealie.png
+    name: mealie
+    sources:
+    - https://github.com/mealie-recipes/mealie/
+    - https://github.com/thelande/charts/
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/mealie-0.5.1/mealie-0.5.1.tgz
+    version: 0.5.1
   - apiVersion: v2
     appVersion: v3.7.0
     created: "2025-12-13T20:13:08.299192443Z"
@@ -1288,4 +1325,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-13T20:13:08.299348708Z"
+generated: "2025-12-13T21:03:24.851247731Z"
