@@ -1,0 +1,84 @@
+{{- include "bjw-s.common.loader.init" . }}
+
+{{- define "apcupsdExporter.hardcodedValues" -}}
+# Set the nameOverride based on the release name if no override has been set
+{{ if not .Values.global.nameOverride }}
+global:
+  nameOverride: "{{ .Release.Name }}"
+{{ end }}
+
+{{- if index .Values "antiAffinity" }}
+defaultPodOptions:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values: [{{ .Release.Name }}]
+{{- end }}
+
+controllers:
+  apcupsd-exporter:
+    type: deployment
+
+    pod:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+
+    containers:
+      main:
+        image:
+          repository: {{ index .Values "apcupsd-exporter" "image" "repository" }}
+          tag: {{ default .Chart.AppVersion (index .Values "apcupsd-exporter" "image" "tag") }}
+        resources: {{ index .Values "apcupsd-exporter" "resources" | toYaml | nindent 10 }}
+        args:
+          - --apcupsd.addr
+          - {{ required "A valid apcupsd target is required." (index .Values "target") }}
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /metrics
+                port: &port 9162
+              periodSeconds: 60
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+
+service:
+  main:
+    ports:
+      http:
+        port: *port
+
+serviceMonitor:
+  main:
+    enabled: {{ index .Values "metrics" "enabled" }}
+    service:
+      identifier: main
+    endpoints:
+      - port: http
+        scheme: http
+        path: /metrics
+        interval: {{ index .Values "metrics" "apcupsd-exporter" "interval" }}
+        scrapeTimeout: {{ index .Values "metrics" "apcupsd-exporter" "timeout" }}
+{{- end -}}
+{{- $_ := mergeOverwrite .Values (include "apcupsdExporter.hardcodedValues" . | fromYaml) -}}
+
+{{/* Render the templates */}}
+{{ include "bjw-s.common.loader.generate" . }}
