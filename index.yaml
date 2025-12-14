@@ -13,6 +13,19 @@ entries:
     version: 0.1.0
   apcupsd-exporter:
   - apiVersion: v2
+    appVersion: v1.1.1
+    created: "2025-12-14T03:13:29.737368291Z"
+    description: Prometheus exporter that exposes metrics from apcupsd's NIS.
+    digest: 9f0b68a9599b2d3013a460d0a62e3518096f727e5746a63bb54c5d20636accfc
+    name: apcupsd-exporter
+    sources:
+    - https://github.com/thelande/apcupsd_exporter
+    - https://github.com/thelande/charts/
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/apcupsd-exporter-0.1.1/apcupsd-exporter-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: v1.0.6
     created: "2025-02-25T05:31:54.907356333Z"
     description: A Helm chart for apcupsd-exporter
@@ -1325,4 +1338,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-13T21:03:24.851247731Z"
+generated: "2025-12-14T03:13:29.737531045Z"
