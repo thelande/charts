@@ -1,6 +1,6 @@
 # prusa-exporter
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![AppVersion: 2.0.0-rc1](https://img.shields.io/badge/AppVersion-2.0.0--rc1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 2.0.0](https://img.shields.io/badge/AppVersion-2.0.0-informational?style=flat-square)
 
 Prometheus exporter for Prusa3D printers - supports Prusa Link API and Syslog metrics as well as logs from printer.
 

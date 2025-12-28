@@ -5,7 +5,7 @@ annotations:
   category: 3D Printing
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: 2.0.0-rc1
+appVersion: 2.0.0
 dependencies:
   - name: common
     repository: https://bjw-s-labs.github.io/helm-charts
@@ -20,4 +20,4 @@ name: prusa-exporter
 sources:
   - https://github.com/thelande/charts/tree/main/charts/prusa-exporter
   - https://github.com/pubeldev/prusa_exporter
-version: 0.2.1
+version: 0.3.0
