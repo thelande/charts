@@ -1,0 +1,614 @@
+---
+{{- include "bjw-s.common.loader.init" . }}
+
+{{- define "sdtd.hardcodedValues" -}}
+# Set the nameOverride based on the release name if no override has been set
+{{ if not .Values.global.nameOverride }}
+global:
+  nameOverride: "{{ .Release.Name }}"
+{{ end }}
+
+configMaps:
+  scripts:
+    includeChecksumInControllers: [main]
+    forceRename: {{ .Release.Name }}-scripts
+    data:
+      lib.sh: |
+        #!/usr/bin/env bash
+        set -u
+
+        _use_color() {
+          use_color=0
+          if [[ -t 1 ]]; then
+            use_color=1
+          fi
+        }
+
+        _log() {
+          local level="$1"; shift
+          local timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+          local color=37
+          [[ "$level" == "INFO" ]] && color=36
+          [[ "$level" == "WARN" ]] && color=33
+          [[ "$level" == "ERROR" || "$level" == "FATAL" ]] && color=31
+          [[ "$level" == "DEBUG" ]] && color=35
+
+          if [[ "$use_color" -eq 1 ]]; then
+            printf "\033[%dm%s: [%-8s] %s\033[0m\n" "$color" "$timestamp" "$level" "$*"
+          else
+            printf "%s [%-8s] %s\n" "$timestamp" "$level" "$*"
+          fi
+        }
+
+        log_info()  { _log "INFO"  "$@"; }
+        log_warn()  { _log "WARN"  "$@"; }
+        log_error() { _log "ERROR" "$@"; }
+        log_fatal() { _log "FATAL" "$@"; exit 1; }
+        log_debug() {
+          if [[ "$DEBUG" == "true" ]]; then
+            _log "DEBUG" "$@";
+          fi
+        }
+
+        _use_color
+
+      mkservercfg.sh: |
+        #!/bin/bash
+        #
+        # Generate the serverconfig.xml file.
+        #
+        # Requires that the SERVER_PASSWORD and TELNET_PASSWORD environment variables
+        # be defined.
+        #
+        set -eu
+
+        BASE_DIR="$(cd "$(dirname "$0")"; pwd -P)"
+        source "$BASE_DIR/lib.sh"
+
+        CFG_FILE="$INSTALL_DIR/serverconfig.xml"
+        log_info "Writing configuration file: $CFG_FILE"
+
+        WORLD_DATA_DIR="$INSTALL_DIR/UserData"
+
+        cat<<EOF >"$CFG_FILE"
+        <?xml version="1.0"?>
+        {{- with index .Values "sdtd" "serverConfig" }}
+        <ServerSettings>
+            <!-- GENERAL SERVER SETTINGS -->
+
+            <!-- Server representation -->
+            {{- with .server }}
+            <property name="ServerName" value="{{ .serverName }}"/>
+            <property name="ServerDescription" value="{{ .serverDescription }}"/>
+            <property name="ServerWebsiteURL" value="{{ .serverWebsiteUrl }}"/>
+            <property name="ServerPassword" value="$SERVER_PASSWORD" />
+            <property name="ServerLoginConfirmationText" value="{{ .serverLoginConfirmationText }}" />
+            <property name="Region" value="{{ .region }}" />
+            <property name="Language" value="{{ .language }}" />
+            {{- end }}
+
+            <!-- Networking -->
+            {{- with .networking }}
+            <property name="ServerPort" value="{{ .serverPort }}"/>
+            <property name="ServerVisibility" value="{{ .serverVisibility }}"/>
+            <property name="ServerDisabledNetworkProtocols"	value="{{ .serverDisabledNetworkProtocols }}"/>
+            <property name="ServerMaxWorldTransferSpeedKiBs" value="{{ .serverMaxWorldTransferSpeedKiBs }}"/>
+            {{- end }}
+
+            <!-- Slots -->
+            {{- with .slots }}
+            <property name="ServerMaxPlayerCount" value="{{ .serverMaxPlayerCount }}" />
+            <property name="ServerReservedSlots" value="{{ .serverReservedSlots }}"/>
+            <property name="ServerReservedSlotsPermission" value="{{ .serverReservedSlotsPermission }}"/>
+            <property name="ServerAdminSlots" value="{{ .serverAdminSlots }}"/>
+            <property name="ServerAdminSlotsPermission" value="{{ .serverAdminSlotsPermission }}"/>
+            {{- end }}
+
+            <!-- Admin interfaces -->
+            {{- with .admin }}
+            <property name="WebDashboardEnabled" value="{{ .webDashboardEnabled }}"/>
+            <property name="WebDashboardPort" value="{{ .webDashboardPort }}"/>
+            <property name="WebDashboardUrl" value="{{ .webDashboardUrl }}"/>
+            <property name="EnableMapRendering" value="{{ .enableMapRendering }}"/>
+
+            <property name="TelnetEnabled" value="{{ .telnetEnabled }}"/>
+            <property name="TelnetPort" value="{{ .telnetPort }}"/>
+            <property name="TelnetPassword" value="$TELNET_PASSWORD"/>
+            <property name="TelnetFailedLoginLimit" value="{{ .telnetFailedLoginLimit }}"/>
+            <property name="TelnetFailedLoginsBlocktime" value="{{ .telnetFailedLoginsBlocktime }}"/>
+
+            <property name="TerminalWindowEnabled" value="false"/>
+            {{- end }}
+
+            <!-- Folder and file locations -->
+            <property name="AdminFileName" value="serveradmin.xml"/> <!-- File name relative to the <UserDataFolder>/Saves/ folder. -->
+            <property name="UserDataFolder" value="$WORLD_DATA_DIR" /> <!-- This is where the world data is stored -->
+
+            <!-- Other technical settings -->
+            {{- with .other }}
+            <property name="ServerAllowCrossplay"	value="{{ .serverAllowCrossplay }}"/>
+            <property name="EACEnabled" value="{{ .eacEnabled }}"/>
+            <property name="IgnoreEOSSanctions" value="{{ .ignoreEOSSanctions }}"/>
+            <property name="HideCommandExecutionLog" value="{{ .hideCommandExecutionLog }}"/>
+            <property name="MaxUncoveredMapChunksPerPlayer" value="{{ .maxUncoveredMapChunksPerPlayer }}"/>
+            <property name="PersistentPlayerProfiles" value="{{ .persistentPlayerProfiles }}" />
+            <property name="MaxChunkAge" value="{{ .maxChunkAge }}"/>
+            <property name="SaveDataLimit" value="{{ .saveDataLimit }}"/>
+            {{- end }}
+
+            <!-- GAMEPLAY -->
+            {{- with .gameplay }}
+
+            <!-- World -->
+            {{- with .world }}
+            <property name="GameWorld" value="{{ .gameWorld }}"/>
+            <property name="WorldGenSeed" value="{{ .worldGenSeed }}"/>
+            <property name="WorldGenSize" value="{{ .worldGenSize }}"/>
+            <property name="GameName" value="{{ .gameName }}"/>
+            <property name="GameMode" value="{{ .gameMode }}"/>
+            {{- end }}
+
+            <!-- Difficulty -->
+            {{- with .difficulty }}
+            <property name="PlayerSafeZoneLevel" value="{{ .playerSafeZoneLevel }}" />
+            <property name="PlayerSafeZoneHours" value="{{ .playerSafeZoneHours }}" />
+            {{- end }}
+
+            <!-- Game Rules -->
+            {{- with .gameRules }}
+            <property name="BuildCreate" value="{{ .buildCreate }}" />
+            <property name="BedrollDeadZoneSize" value="{{ .bedrollDeadZoneSize }}" />
+            <property name="BedrollExpiryTime" value="{{ .bedrollExpiryTime }}" />
+            <property name="AllowSpawnNearFriend" value="{{ .allowSpawnNearFriend }}" />
+            <property name="CameraRestrictionMode" value="{{ .cameraRestrictionMode }}" />
+            {{- end }}
+
+            <!-- Performance related -->
+            {{- with .performance }}
+            <property name="MaxSpawnedZombies" value="{{ .maxSpawnedZombies }}" />
+            <property name="MaxSpawnedAnimals" value="{{ .maxSpawnedAnimals }}" />
+            <property name="ServerMaxAllowedViewDistance" value="{{ .serverMaxAllowedViewDistance }}" />
+            <property name="MaxQueuedMeshLayers" value="{{ .maxQueuedMeshLayers }}" />
+            {{- end }}
+
+            <!-- Multiplayer -->
+            {{- with .multiplayer }}
+            <property name="PartySharedKillRange" value="{{ .partySharedKillRange }}"/>
+            <property name="PlayerKillingMode" value="{{ .playerKillingMode }}" />
+            {{- end }}
+
+            <!-- Land claim options -->
+            {{- with .landClaim }}
+            <property name="LandClaimCount" value="{{ .landClaimCount }}"/>
+            <property name="LandClaimSize" value="{{ .landClaimSize }}"/>
+            <property name="LandClaimDeadZone" value="{{ .landClaimDeadZone }}"/>
+            <property name="LandClaimExpiryTime" value="{{ .landClaimExpiryTime }}"/>
+            <property name="LandClaimDecayMode" value="{{ .landClaimDecayMode }}"/>
+            <property name="LandClaimOnlineDurabilityModifier" value="{{ .landClaimOnlineDurabilityModifier }}"/>
+            <property name="LandClaimOfflineDurabilityModifier" value="{{ .landClaimOfflineDurabilityModifier }}"/>
+            <property name="LandClaimOfflineDelay" value="{{ .landClaimOfflineDelay }}"/>
+
+            <property name="DynamicMeshEnabled" value="{{ .dynamicMeshEnabled }}"/>
+            <property name="DynamicMeshLandClaimOnly" value="{{ .dynamicMeshLandClaimOnly }}"/>
+            <property name="DynamicMeshLandClaimBuffer" value="{{ .dynamicMeshLandClaimBuffer }}"/>
+            <property name="DynamicMeshMaxItemCache" value="{{ .dynamicMeshMaxItemCache }}"/>
+
+            <property name="TwitchServerPermission" value="{{ .twitchServerPermission }}"/>
+            <property name="TwitchBloodMoonAllowed" value="{{ .twitchBloodMoonAllowed }}"/>
+            {{- end }}
+
+            <!-- Misc. -->
+            {{- with .misc }}
+            <property name="SandboxCode" value="{{ .sandboxCode }}" />
+            {{- end }}
+            {{- end }}{{/* with .gameplay */}}
+        </ServerSettings>
+        {{- end }}{{/* with .Values.serverConfig */}}
+        EOF
+
+        log_info "Wrote $CFG_FILE"
+
+        $BASE_DIR/mkserveradmin.sh "$WORLD_DATA_DIR"
+
+        exit 0
+
+      mkserveradmin.sh: |
+        #!/bin/bash
+        #
+        # Generate the serveradmin.xml file.
+        #
+        # Takes the world save path (i.e., UserDataFolder) as the only argument.
+        #
+        set -e
+
+        BASE_DIR="$(cd "$(dirname "$0")"; pwd -P)"
+        source "$BASE_DIR/lib.sh"
+
+        [[ -z "$1" ]] && log_fatal "UserDataFolder was not provided."
+        WORLD_DATA_DIR="$1"
+
+        CFG_FILE="$WORLD_DATA_DIR/Saves/serveradmin.xml"
+        log_info "Writing admin config file: $CFG_FILE"
+
+        CFG_DIR="$(dirname "$CFG_FILE")"
+        mkdir -p "$CFG_DIR"
+
+        cat<<EOF >"$CFG_FILE"
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!--
+                This file holds the settings for who is banned, whitelisted,
+                admins and server command permissions. The admin and whitelist sections can contain
+                both individual Steam users as well as Steam groups.
+
+                STEAM ID INSTRUCTIONS:
+                ===============================================================
+                You can find the SteamID64 of any user with one of the following pages:
+                https://steamdb.info/calculator/, https://steamid.io/lookup, http://steamid.co/
+                http://steamid.co/ instructions:
+                Input the player's name in the search field. example: Kinyajuu
+                If the name doesn't work, you can also use the url of their steam page.
+                Also you may add/remove admins, mods, whitelist, blacklist using in game commands.
+                You will want the STEAM64ID. example: 76561198021925107
+
+                STEAM GROUP ID INSTRUCTIONS:
+                ===============================================================
+                You can find the SteamID64 of any group by taking its address and adding
+                    /memberslistxml/?xml=1
+                to the end. You will get the XML information of the group which should have an entry
+                memberList->groupID64.
+                Example: The 'Steam Universe' group has the address
+                    https://steamcommunity.com/groups/steamuniverse
+                So you point your browser to
+                    https://steamcommunity.com/groups/steamuniverse/memberslistxml/?xml=1
+                And see that the groupID64 is 103582791434672565.
+
+                XBOX LIVE ID INSTRUCTIONS:
+                ===============================================================
+                Check the client or server log for the PXUID of a player or use the console commands to add players
+                to the list.
+
+                PERMISSION LEVEL INSTRUCTIONS:
+                ===============================================================
+                permission level : 0-1000, a user may run any command equal to or above their permission level.
+                Users not given a permission level in this file will have a default permission level of 1000!
+
+                COMMAND PERMISSIONS INSTRUCTIONS:
+                ===============================================================
+                cmd : This is the command name, any command not in this list will not be usable by anyone but the server.
+                permission level : 0-1000, a user may run any command equal to or above their permission level.
+                Commands not specified in this file will have a default permission level of 0!
+
+                EVERYTHING BETWEEN <!- - and - -> IS COMMENTED OUT! THE ENTRIES BELOW ARE EXAMPLES THAT ARE NOT ACTIVE!!!
+        -->
+        {{- with index .Values "sdtd" "userConfig" }}
+        <adminTools>
+            <!-- Name in any entries is optional for display purposes only -->
+            <users>
+            {{- range .users }}
+            <user platform="Steam" userid="{{ .steamID }}" name="{{ .name }}" permission_level="{{ .permissionLevel }}" />
+            {{- end }}
+            {{- range .groups }}
+            <group steamID="{{ .steamID }}" name="{{ .name }}" permission_level_default="{{ .permissionLevelDefault }}" permission_level_mod="{{ .permissionLevelMod }}" />
+            {{- end }}
+            </users>
+            <whitelist>
+            {{- range .allowlistUsers }}
+            <user platform="Steam" userid="{{ .steamID }}" name="{{ .name }}" />
+            {{- end }}
+            {{- range .allowlistGroups }}
+            <group steamID="{{ .steamID }}" name="{{ .name }}" />
+            {{- end }}
+            </whitelist>
+            <blacklist>
+            {{- range .denylist }}
+            <blacklisted platform="Steam" userid="{{ .steamID }}" name="{{ .name }}" unbandate="{{ .unbanDate }}" reason="{{ .reason }}" />
+            {{- end }}
+            </blacklist>
+            <commands>
+            <!-- <permission cmd="dm" permission_level="0" /> -->
+            <!-- <permission cmd="kick" permission_level="1" /> -->
+            <!-- <permission cmd="say" permission_level="1000" /> -->
+            <permission cmd="automation" permission_level="1000" />
+            <permission cmd="ccphysics" permission_level="1000" />
+            <permission cmd="chunkcache" permission_level="1000" />
+            <permission cmd="createwebuser" permission_level="1000" />
+            <permission cmd="debugshot" permission_level="1000" />
+            <permission cmd="debugweather" permission_level="1000" />
+            <permission cmd="decomgr" permission_level="1000" />
+            <permission cmd="exportcurrentconfigs" permission_level="1000" />
+            <permission cmd="fallingblocks" permission_level="1000" />
+            <permission cmd="getgamepref" permission_level="1000" />
+            <permission cmd="getgamestat" permission_level="1000" />
+            <permission cmd="getlogpath" permission_level="1000" />
+            <permission cmd="getoptions" permission_level="1000" />
+            <permission cmd="getsandboxoptions" permission_level="1000" />
+            <permission cmd="gettime" permission_level="1000" />
+            <permission cmd="gfx" permission_level="1000" />
+            <permission cmd="graph" permission_level="1000" />
+            <permission cmd="help" permission_level="1000" />
+            <permission cmd="listplayerids" permission_level="1000" />
+            <permission cmd="listthreads" permission_level="1000" />
+            <permission cmd="loot" permission_level="1000" />
+            <permission cmd="memcl" permission_level="1000" />
+            <permission cmd="meshdatamanager" permission_level="1000" />
+            <permission cmd="performanceprofiler" permission_level="1000" />
+            <permission cmd="settempunit" permission_level="1000" />
+            <permission cmd="signeditordebug" permission_level="1000" />
+            <permission cmd="signtexman" permission_level="1000" />
+            <permission cmd="uioptions" permission_level="1000" />
+            {{- range .commands }}
+            <permission cmd="{{ .cmd }}" permission_level="{{ .permissionLevel }}" />
+            {{- end }}
+            </commands>
+            <apitokens>
+            <!-- <token name="adminuser1" secret="supersecrettoken" permission_level="0" /> -->
+            </apitokens>
+            <webmodules />
+            <webusers />
+        </adminTools>
+        {{- end }}
+        EOF
+
+        log_info "Wrote $CFG_FILE"
+
+        exit 0
+
+defaultPodOptions:
+  securityContext: {{ index .Values "sdtd" "podSecurityContext" | toYaml | nindent 4 }}
+
+controllers:
+  main:
+    type: deployment
+
+    defaultContainerOptions:
+      securityContext: {{ index .Values "sdtd" "containerSecurityContext" | toYaml | nindent 8 }}
+
+    initContainers:
+      init-config:
+        image: &image
+          repository: {{ index .Values "sdtd" "image" "repository" }}
+          tag: {{ default .Chart.AppVersion (index .Values "sdtd" "image" "tag") }}
+          pullPolicy: {{ index .Values "sdtd" "image" "pullPolicy" }}
+        command: ["/scripts/mkservercfg.sh"]
+        env:
+          - name: SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "sdtd.serverConfig.server.serverPasswordSecret is required" (index .Values "sdtd" "serverConfig" "server" "serverPasswordSecret") | quote }}
+                key: password
+          - name: TELNET_PASSWORD
+          {{- if index .Values "sdtd" "serverConfig" "admin" "telnetEnabled" }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ required "sdtd.serverConfig.admin.telnetPasswordSecret is required" (index .Values "sdtd" "serverConfig" "admin" "telnetPasswordSecret") | quote }}
+                key: password
+          {{- else }}
+            value: ""
+          {{- end }}
+
+      install-server:
+        image: *image
+        command: ["/install-game.sh"]
+        env:
+        {{- if index .Values "sdtd" "validate" }}
+          - name: DO_VALIDATE
+            value: "1"
+        {{- end }}
+
+        {{- with index .Values "sdtd" "resources" }}
+        resources: {{ . | toYaml | nindent 10 }}
+        {{- end }}
+
+      {{- if index .Values "sdtd" "allocsFixes" "enabled" }}
+      {{ $overrideVer := (index .Values "sdtd" "allocsFixes" "overrideVersion") }}
+      {{ $downloadFile := (empty $overrideVer) | ternary "server_fixes.tar.gz" (printf "server_fixes_%s.tar.gz" $overrideVer) }}
+      install-allocs:
+        image:
+          repository: busybox
+          tag: latest
+          pullPolicy: Always
+        command:
+          - sh
+          - -c
+          - |
+            URL="https://illy.bz/fi/7dtd/{{ $downloadFile }}"
+            echo "Downloading $URL ..."
+            wget "$URL" -O /tmp/{{ $downloadFile }}
+            tar zxf /tmp/{{ $downloadFile }} -C /data
+
+        dependsOn:
+          - install-server
+      {{- end }}
+
+    containers:
+      main:
+        image: *image
+        command: ["/start-server.sh"]
+        probes:
+          liveness: &probes
+            enabled: {{ index .Values "sdtd" "probes" "enabled" }}
+            port: &gamePort 26900
+          readiness: *probes
+          startup:
+            enabled: {{ index .Values "sdtd" "probes" "enabled" }}
+            custom: true
+            spec:
+              tcpSocket:
+                port: *gamePort
+              failureThreshold: 3
+              timeoutSeconds: 5
+              periodSeconds: 10
+              initialDelaySeconds: 180
+
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/stop-server.sh"]
+
+        {{- with index .Values "sdtd" "resources" }}
+        resources: {{ . | toYaml | nindent 10 }}
+        {{- end }}
+
+  {{- if index .Values "sdtd-exporter" "enabled" }}
+  exporter:
+    defaultContainerOptions:
+      securityContext: {{ index .Values "sdtd" "containerSecurityContext" | toYaml | nindent 8 }}
+
+    type: deployment
+    containers:
+      main:
+        image:
+          repository: {{ index .Values "sdtd-exporter" "image" "repository" }}
+          tag: {{ index .Values "sdtd-exporter" "image" "tag" }}
+          pullPolicy: {{ index .Values "sdtd-exporter" "image" "pullPolicy" }}
+
+        {{ $authSecret := required "sdtd-exporter.authSecret is required" (index .Values "sdtd-exporter" "authSecret") }}
+        env:
+          - name: SDTD_API_URL
+            value: {{ required "sdtd-exporter.apiUrl is required" (index .Values "sdtd-exporter" "apiUrl") | quote }}
+          - name: SDTD_TOKEN_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ $authSecret | quote }}
+                key: name
+          - name: SDTD_TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ $authSecret | quote }}
+                key: token
+
+        probes:
+          liveness: &exporterProbes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /metrics
+                port: &exporterPort 9816
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 3
+          readiness: *exporterProbes
+  {{- end }}
+
+{{- if and (index .Values "sdtd-exporter" "enabled") (index .Values "sdtd-exporter" "serviceMonitor" "enabled") }}
+serviceMonitor:
+  exporter:
+    service:
+      identifier: exporter
+    endpoints:
+      - port: metrics
+        interval: {{ index .Values "sdtd-exporter" "serviceMonitor" "scrapeInterval" }}
+{{- end }}
+
+service:
+  game:
+    controller: main
+    ports:
+      game:
+        port: *gamePort
+      game-udp:
+        portRange:
+          start: 26900
+          end: 26904
+        protocol: UDP
+      dashboard:
+        port: &dashboardPort 8080
+      telnet:
+        port: &telnetPort 8081
+
+  {{- if index .Values "sdtd-exporter" "enabled" }}
+  exporter:
+    controller: exporter
+    ports:
+      metrics:
+        port: *exporterPort
+  {{- end }}
+
+persistence:
+  scripts:
+    type: configMap
+    name: {{ .Release.Name }}-scripts
+    defaultMode: 0o755
+    advancedMounts:
+      main:
+        init-config:
+          - path: /scripts
+            readOnly: true
+
+  data:
+    {{- if not (index .Values "sdtd" "persistence" "data" "existingClaim") }}
+    type: persistentVolumeClaim
+    accessMode: {{ index .Values "sdtd" "persistence" "data" "accessMode" }}
+    size: {{ index .Values "sdtd" "persistence" "data" "size" }}
+    storageClass: {{ index .Values "sdtd" "persistence" "data" "storageClass" }}
+    retain: true
+    {{- else }}
+    existingClaim: {{ index .Values "sdtd" "persistence" "data" "existingClaim" }}
+    {{- end }}
+    advancedMounts:
+      main:
+        install-server: &dataPath
+          - path: /data
+        init-config: *dataPath
+        main: *dataPath
+        {{- if index .Values "sdtd" "allocsFixes" "enabled" }}
+        install-allocs: *dataPath
+        {{- end }}
+
+  steam:
+    {{- if not (index .Values "sdtd" "persistence" "steam" "existingClaim") }}
+    type: persistentVolumeClaim
+    accessMode: {{ index .Values "sdtd" "persistence" "steam" "accessMode" }}
+    size: {{ index .Values "sdtd" "persistence" "steam" "size" }}
+    storageClass: {{ index .Values "sdtd" "persistence" "steam" "storageClass" }}
+    retain: true
+    {{- else }}
+    existingClaim: {{ index .Values "sdtd" "persistence" "steam" "existingClaim" }}
+    {{- end }}
+    advancedMounts:
+      main:
+        install-server: &steamPath
+          - path: /home/steam
+        main: *steamPath
+
+  tmp:
+    type: emptyDir
+
+{{/* Only configure ingress or route if the dashboard is enabled */}}
+{{- if index .Values "sdtd" "serverConfig" "admin" "webDashboardEnabled" }}
+ingress:
+  main:
+    enabled: {{ index .Values "sdtd" "ingress" "enabled" }}
+    annotations: {{ index .Values "sdtd" "ingress" "annotations" }}
+    labels: {{ index .Values "sdtd" "ingress" "labels" }}
+    className: {{ index .Values "sdtd" "ingress" "className" }}
+    hosts:
+      - host: {{ index .Values "sdtd" "ingress" "hostname" }}
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: game
+              port: dashboard
+    tls: {{ index .Values "sdtd" "ingress" "tls" }}
+
+route:
+  main:
+    enabled: {{ index .Values "sdtd" "route" "enabled" }}
+    annotations: {{ index .Values "sdtd" "route" "annotations" | toYaml | nindent 6 }}
+    labels: {{ index .Values "sdtd" "route" "labels" | toYaml | nindent 6 }}
+    hostnames: {{ index .Values "sdtd" "route" "hostnames" | toYaml | nindent 6 }}
+    parentRefs: {{ index .Values "sdtd" "route" "parentRefs" | toYaml | nindent 6 }}
+    rules:
+      - backendRefs:
+          - identifier: game
+            port: dashboard
+{{- end }}
+
+{{- end -}}
+{{- $_ := mergeOverwrite .Values (include "sdtd.hardcodedValues" . | fromYaml) -}}
+
+{{/* Render the templates */}}
+{{ include "bjw-s.common.loader.generate" . }}
