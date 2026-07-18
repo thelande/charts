@@ -3,6 +3,26 @@ entries:
   7dtd:
   - apiVersion: v2
     appVersion: 0.6.1
+    created: "2026-07-18T21:20:22.891114001Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts/
+      version: 5.0.1
+    description: A Helm chart to deploy the 7 Days to Die Dedicated Server
+    digest: 7f9e5e32969a1d2dc221c044b89ef94f2c4b85c02f8cb26aa3a0fea36da8b548
+    icon: https://static.wikia.nocookie.net/7daystodie_gamepedia/images/e/e6/Site-logo.png
+    maintainers:
+    - email: thomas.helander@gmail.com
+      name: Tom Helander
+    name: 7dtd
+    sources:
+    - https://github.com/thelande/7dtd
+    type: application
+    urls:
+    - https://github.com/thelande/charts/releases/download/7dtd-0.6.2/7dtd-0.6.2.tgz
+    version: 0.6.2
+  - apiVersion: v2
+    appVersion: 0.6.1
     created: "2026-07-15T19:59:16.035313037Z"
     dependencies:
     - name: common
@@ -1421,4 +1441,4 @@ entries:
     urls:
     - https://github.com/thelande/charts/releases/download/sdtd-exporter-0.1.0/sdtd-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-15T19:59:16.035503032Z"
+generated: "2026-07-18T21:20:22.891244285Z"
