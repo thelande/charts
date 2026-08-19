@@ -19,6 +19,7 @@ Docmost is an open-source collaborative wiki and documentation software. It is a
 | docmost.appUrl | string | `""` | docmost externally accessible URL |
 | docmost.databaseMaxPool | string | `""` | Database max pool size (default: 10) |
 | docmost.debugMode | bool | `false` | Enable debug mode (default: false) |
+| docmost.appSecret.existingSecret | string | `""` | An existing secret containing the application secret under the `appSecret` key. If unset, the chart generates a random secret and preserves it across upgrades. |
 | docmost.disableTelemetry | bool | `false` | Disable telemetry (default: false) |
 | docmost.drawIO.url | string | `""` | Custom draw.io server url. |
 | docmost.fileImportSizeLimit | string | `""` | File import size limit (e.g., "200mb") |

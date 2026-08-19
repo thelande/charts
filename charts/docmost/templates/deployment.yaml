@@ -76,7 +76,7 @@ spec:
             - name: APP_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-app-secret" (include "docmost.fullname" .) }}
+                  name: {{ include "docmost.appSecret.secretName" . }}
                   key: appSecret
             - name: REDIS_URL
               value: {{ (required "A redis URL is required" .Values.redis.url) | quote }}

@@ -142,6 +142,11 @@ docmost:
   # -- Enable debug mode (default: false)
   debugMode: false
 
+  appSecret:
+    # -- An existing secret containing the application secret under the `appSecret` key.
+    # If unset, the chart generates a random secret and preserves it across upgrades.
+    existingSecret: ""
+
   drawIO:
     # -- Custom draw.io server url.
     url: ""

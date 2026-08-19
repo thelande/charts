@@ -69,6 +69,13 @@ Name of the persistent volume claim
 {{- end }}
 
 {{/*
+Name of the app secret.
+*/}}
+{{- define "docmost.appSecret.secretName" -}}
+{{ default (printf "%s-%s" (include "docmost.fullname" .) "app-secret") .Values.docmost.appSecret.existingSecret }}
+{{- end }}
+
+{{/*
 Name of the SMTP auth secret.
 */}}
 {{- define "docmost.smtp.auth.secretName" -}}
